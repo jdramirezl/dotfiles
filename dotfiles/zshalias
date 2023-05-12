@@ -1,0 +1,25 @@
+# -------------------------------------------------------------------
+# Generic
+# -------------------------------------------------------------------
+alias lh='ls -a | egrep "^\."'
+alias tm='tmux attach || tmux new'
+
+# -------------------------------------------------------------------
+# Git
+# -------------------------------------------------------------------
+alias add="git remote addj"
+alias add="git add"
+alias checkout='git checkout'
+alias commit='git commit'
+alias fetch="git fetch"
+alias log="git log"
+alias pull="git pull"
+alias push='git push'
+alias stash="git stash"
+alias status="git status"
+alias gd="git diff"
+alias gs="git show"
+alias gca='nvr --nostart -s -c wa; git commit -a -m'
+alias gcan='nvr --nostart -s -c wa; git commit -a --amend --no-edit'
+alias gcan!='nvr --nostart -s -c wa; git commit -a --amend --no-edit && git push --force-with-lease' # gcan!
+alias gpf='git push --force-with-lease'
