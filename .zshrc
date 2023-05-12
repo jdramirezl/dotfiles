@@ -1,3 +1,6 @@
+# EXECUTE IN THE OH MY ZSH FOLDER TO MAKE IT FASTEEEEEEEEEEEEEER
+# git config --add oh-my-zsh.hide-dirty 1
+ 
 # -------------------------------------------------------------------
 # Config
 # -------------------------------------------------------------------
