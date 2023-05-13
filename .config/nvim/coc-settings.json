@@ -48,18 +48,6 @@
     "inlayHint.enableParameter": false
   },
   "python.linting.enabled": true,
-  "python.linting.pylintEnabled": false,
-  "python.linting.flake8Enabled": true,
-  "python.linting.mypyEnabled": true,
   "python.formatting.provider": "black",
-  "languageserver": {
-    "python": {
-      "formatting": {
-        "provider": "black"
-      },
-      "black": {
-        "enabled": true
-      }
-    }
-  }
+  "coc.preferences.formatOnType": true,
 }
