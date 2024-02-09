@@ -11,11 +11,11 @@ commit_message="Auto commit on $(date +'%Y-%m-%d')"
 
 # Function to copy files from directories to the repository
 copy_files() {
-    sudo cp -r "$zshrc" "$repo_path/zsh/"
-    sudo cp -r "$zshfuncs"/* "$repo_path/zsh/zshfuncs/"
-    sudo cp -r "$ohmyzsh"/* "$repo_path/ohmyzsh/"
-    sudo cp -r "$nvim"/* "$repo_path/nvim/"
-    sudo cp -r "$tmux" "$repo_path/tmux/"
+    cp -r "$zshrc" "$repo_path/zsh/"
+    cp -r "$zshfuncs"/* "$repo_path/zsh/zshfuncs/"
+    cp -r "$ohmyzsh"/* "$repo_path/ohmyzsh/"
+    cp -r "$nvim"/* "$repo_path/nvim/"
+    cp -r "$tmux" "$repo_path/tmux/"
 }
 
 # Function to commit and push changes to the repository
