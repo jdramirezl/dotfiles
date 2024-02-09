@@ -1,0 +1,37 @@
+# -------------------------------------------------------------------
+# Generic
+# -------------------------------------------------------------------
+alias lh='ls -a | egrep "^\."'
+alias tm='tmux attach || tmux new'
+alias auth='export TIGER_TOKEN="Bearer $(fury get-token | grep "Bearer" | awk "{print \$2}")"'
+
+# -------------------------------------------------------------------
+# Git
+# -------------------------------------------------------------------
+alias add="git add"
+alias checkout='git checkout'
+alias commit='git commit'
+alias npc='PRE_COMMIT_ALLOW_NO_CONFIG=1 git commit -m'
+alias fetch="git fetch"
+alias log="git log"
+alias pull="git pull"
+alias push='git push'
+alias stash="git stash"
+alias status="git status"
+alias gd="git diff"
+alias gs="git show"
+alias gca='nvr --nostart -s -c wa; git commit -a -m'
+alias gcan='nvr --nostart -s -c wa; git commit -a --amend --no-edit'
+alias gcan!='nvr --nostart -s -c wa; git commit -a --amend --no-edit && git push --force-with-lease' # gcan!
+alias gpf='git push --force-with-lease'
+
+# -------------------------------------------------------------------
+# gsutil
+# -------------------------------------------------------------------
+alias gs='gsutil'
+alias gsc='gsutil cp'
+alias gsm='gsutil mv'
+alias gsr='gsutil rm'
+alias gscr='gsutil -m cp -r'
+
+
