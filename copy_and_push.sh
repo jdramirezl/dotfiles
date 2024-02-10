@@ -26,14 +26,30 @@ push_to_repo() {
     git push origin master --force # Assuming 'master' is the branch name
 }
 
+# Function to create a file with execution date and time
+create_execution_file() {
+    touch "$repo_path/execution_$(date +'%Y-%m-%d_%H-%M-%S').txt"
+}
+
+# Function to delete the execution file after pushing changes
+delete_execution_file() {
+    rm -f "$repo_path/execution_"*.txt
+}
+
+push_to_toast() {
+    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message "$1" -open 'https://github.com/jdramirezl/dotfiles'
+}
 # Execute on Mondays, Wednesdays, and Fridays
 day=$(date +%u)  # Get the day of the week (1=Monday, 2=Tuesday, ..., 7=Sunday)
 
 if [ $day -eq 1 ] || [ $day -eq 3 ] || [ $day -eq 5 ]; then
-    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message 'Starting backup' -open 'https://github.com/jdramirezl/dotfiles'
+    message = "Copying and pushing dotfiles to the repository..."
+    push_to_toast $message
     copy_files
-    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message 'Copy done!' -open 'https://github.com/jdramirezl/dotfiles'
+    create_execution_file
     push_to_repo
-    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message 'Your dotfiles were pushed to the repo!' -open 'https://github.com/jdramirezl/dotfiles'
+    delete_execution_file
+    message = "Backup completed successfully! 🎉"
+    push_to_toast $message
 fi
 
