@@ -42,7 +42,7 @@ push_to_toast() {
 # Execute on Mondays, Wednesdays, and Fridays
 day=$(date +%u)  # Get the day of the week (1=Monday, 2=Tuesday, ..., 7=Sunday)
 
-if [ $day -eq 1 ] || [ $day -eq 3 ] || [ $day -eq 5 ]; then
+if [ $day -eq 1 ] || [ $day -eq 3 ] || [ $day -eq 6 ]; then
     message="Copying and pushing dotfiles to the repository..."
     push_to_toast $message
     copy_files
