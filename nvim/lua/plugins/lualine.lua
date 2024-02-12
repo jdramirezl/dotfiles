@@ -13,7 +13,12 @@ return {
                 lualine_c = { 'filename' },
 
                 -- right
-                lualine_x = { 'g:zoom#statustext', 'encoding', 'fileformat', 'filetype' },
+                -- lualine_x = { 'g:zoom#statustext', 'encoding', 'fileformat', 'filetype' },
+                -- add lualine_x with custom icon
+                lualine_x = { { 'g:zoom#statustext', icon = '' }, 'encoding', {
+                    'fileformat',
+                    symbols = { unix = '¯\\_(ツ)_/¯', dos = '', mac = '' },
+                }, 'filetype' },
                 lualine_y = { 'progress' },
                 lualine_z = { 'location' }
             },

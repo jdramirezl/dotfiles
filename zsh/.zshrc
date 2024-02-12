@@ -38,7 +38,7 @@ plugins=(
 	exa-zsh
 )
 
-
+ZSH_DISABLE_COMPFIX=true
 
 # OMZ config source
 source $ZSH/oh-my-zsh.sh
@@ -48,7 +48,7 @@ source $ZSH/oh-my-zsh.sh
 # -------------------------------------------------------------------
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias poetry='/usr/local/Cellar/poetry/1.6.1_2/bin/poetry'
+alias poetry='/Users/julianramire/.local/bin/poetry'
 # Include Alias
 if [ -f $HOME/dotfiles/zshalias ]; then
     source $HOME/dotfiles/zshalias
