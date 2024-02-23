@@ -1,3 +1,21 @@
+function check_deployment_status() {
+  local version=$1
+
+  while true; do
+    output=$(fda task-image info "$version")
+    if [[ $output == *"Status:  PREPARED"* ]]; then
+      break
+    fi
+    # echo only the Status line from the output
+    echo "$output" | grep "Status"
+    sleep 5
+  done
+
+  echo "$output"
+  echo "Deployment finished!"
+}
+
+
 
 function create-php-project() {
     mkdir bin config docs public resources src tests
@@ -98,7 +116,7 @@ function git-init(){
 alias create-note="create-note"
 
 # MELI commands
-alias authf="auth-fury"
+alias cds="check_deployment_status"
 
 # PHP commands
 alias create-php-project="create-php-project"
