@@ -37,7 +37,7 @@ delete_execution_file() {
 }
 
 push_to_toast() {
-    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message "'$*'" -open 'https://github.com/jdramirezl/dotfiles'
+    /usr/local/bin/terminal-notifier -title '🚀 Dotfile Backup' -message "'$*'" -open 'https://github.com/jdramirezl/dotfiles' -sound Blow
 }
 # Execute on Mondays, Wednesdays, and Fridays
 day=$(date +%u)  # Get the day of the week (1=Monday, 2=Tuesday, ..., 7=Sunday)
