@@ -96,3 +96,11 @@ if [ -f '/Users/julianramire/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . 
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/julianramire/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/julianramire/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+export RANGER_FURY_LOCATION=/Users/julianramire/.fury #Added by Fury CLI
+export RANGER_FURY_VENV_LOCATION=/Users/julianramire/.fury/fury_venv #Added by Fury CLI
+
+# Added by Fury CLI installation process
+declare FURY_BIN_LOCATION="/Users/julianramire/.fury/fury_venv/bin" # Added by Fury CLI installation process
+export PATH="$PATH:$FURY_BIN_LOCATION" # Added by Fury CLI installation process
+# Added by Fury CLI installation process
