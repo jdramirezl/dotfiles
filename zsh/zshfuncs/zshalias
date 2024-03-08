@@ -34,4 +34,19 @@ alias gsm='gsutil mv'
 alias gsr='gsutil rm'
 alias gscr='gsutil -m cp -r'
 
+# -------------------------------------------------------------------
+# Poetry
+# -------------------------------------------------------------------
+alias poe='/Users/julianramire/.local/bin/poetry'
+alias spoe='sudo /Users/julianramire/.local/bin/poetry'
+alias poea='/Users/julianramire/.local/bin/poetry add'
+alias poer='/Users/julianramire/.local/bin/poetry remove'
+alias poei='/Users/julianramire/.local/bin/poetry install'
+alias poeu='/Users/julianramire/.local/bin/poetry update'
+alias poes='/Users/julianramire/.local/bin/poetry shell'
+alias poerun='/Users/julianramire/.local/bin/poetry run'
+alias poeenv='/Users/julianramire/.local/bin/poetry env'
+alias poelock='/Users/julianramire/.local/bin/poetry lock'
+
+
 

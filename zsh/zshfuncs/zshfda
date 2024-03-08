@@ -1,0 +1,76 @@
+function check_deployment_status() {
+  local version output 
+  version=$1
+
+  while true; do
+    local current_status
+    output=$(fda task-image info "$version")
+    current_status=$(echo "$output" | grep -o 'Status: .*' | sed 's/Status: //')
+    echo "$current_status"
+    if [[ $current_status == *"Status: STARTING PREPARE"* || 
+          $current_status == *"Status: PREPARING"* || 
+          $current_status == *"Status: PREPARED"* ]]; then
+      break
+    else
+      echo "Error: Unexpected current_status '$current_status'"
+      return 1  # Stop execution with error
+    fi    # echo only the Status line from the output
+    echo "$output" | grep "Status"
+    sleep 5
+  done
+
+  echo "$output"
+  echo "Deployment finished!"
+}
+
+function fdap() {
+    local name version tags
+    name=$1
+    version=${*: -1}
+    echo "$name"
+    echo "$version"
+    shift 1
+    tags=()
+
+    while [[ $# -gt 0 ]]; do
+        if [[ "$1" == "--tag" ]]; then
+            shift
+            tags+=("$1")
+        fi
+        shift
+    done
+
+    echo "$tags"
+
+    # Construct the fda command
+    local fda_command="fda prepare $name --version $version"
+    for tag in "${tags[@]}"; do
+        fda_command+=" --tag $tag"
+    done
+
+    echo $fda_command
+
+    # Execute the constructed fda command
+    {
+        local fda_output
+        fda_output=$(eval "$fda_command")
+    } || {
+        echo "FDA prepare failed!"
+        return 1
+    }
+    echo "$fda_output"
+
+    # Extract the Task Image ID using grep and cut
+    {
+        local task_image_id
+        task_image_id=$(echo "$fda_output" | grep "Task Image ID" | cut -d ':' -f 2- | tr -d '[:space:]')
+    } || {
+        echo "FDA prepare failed!"
+        return 1
+    }
+    # run the check_deployment_status command with the task image id
+    check_deployment_status $task_image_id
+}
+
+alias cds="check_deployment_status"
+alias fdap="fdap"

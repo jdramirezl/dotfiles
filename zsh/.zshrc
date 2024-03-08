@@ -61,7 +61,11 @@ if [ -f $HOME/dotfiles/zshfunc ]; then
     echo "Found functions"
 fi
 
-
+# Include fda
+if [ -f $HOME/dotfiles/zshfda ]; then
+    source $HOME/dotfiles/zshfda
+    echo "Found FDA function"
+fi
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
