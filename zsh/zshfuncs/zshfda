@@ -1,22 +1,169 @@
-function check_deployment_status() {
+function toast() {
+    /usr/local/bin/terminal-notifier -title 'Task-Image Update' -message "'$*'"  -sound Glass
+}
+function toast-error() {
+    /usr/local/bin/terminal-notifier -title 'Task-Image Update' -message "'$*'"  -sound Hero
+}
+function check_run_status() {
   local version output 
   version=$1
 
   while true; do
     local current_status
     output=$(fda task-image info "$version")
-    current_status=$(echo "$output" | grep -o 'Status: .*' | sed 's/Status: //')
-    echo "$current_status"
-    if [[ $current_status == *"Status: STARTING PREPARE"* || 
-          $current_status == *"Status: PREPARING"* || 
-          $current_status == *"Status: PREPARED"* ]]; then
-      break
+    current_status=$(echo "$output" | grep -o 'Status: .*' | sed 's/Status: //' | sed 's/^ *//;s/ *$//')
+    if [[ $current_status == *"PREPARED"* ]]; then
+        toast "✅ Task preparation done!"
+        break
+    elif [[ $current_status == *"STARTING PREPARE"* || 
+        $current_status == *"PREPARE VALIDATION"* ]]; then
+        toast "🛠️ Starting task run"
+    elif [[ $current_status == *"PREPARING"* || 
+        $current_status == *''* ]]; then
+        continue
     else
-      echo "Error: Unexpected current_status '$current_status'"
-      return 1  # Stop execution with error
+        toast-error "🚫 Task preparation Failed!"
+        echo "Error: Unexpected status: '$current_status'"
+        echo "Errors:"
+        errors=$(echo "$output" | grep -A9999 'Errors:' | sed -n '/Errors:/,$p' | grep '^ *-')
+        echo "$errors"
+        return 1  # Stop execution with error
     fi    # echo only the Status line from the output
-    echo "$output" | grep "Status"
-    sleep 5
+    echo -e "\r\033$current_status"
+    sleep 7
+  done
+
+  echo "$output"
+  echo "Deployment finished!"
+}
+
+function fdar() {
+    local id
+    id=$1
+    local expected_outputs=()
+    local expected_inputs_runtime=()
+    local expected_inputs_artifacts=()
+    local tags=()
+    local task_id
+
+    output=$(fda task-image info $id)
+   local current_section
+   current_section=""
+   while IFS= read -r line; do
+        if [[ $line == *"Expected outputs:"* ]]; then
+            current_section="expected_outputs"
+        elif [[ $line == *"runtime:"* ]]; then
+            current_section="expected_inputs_runtime"
+        elif [[ $line == *"artifacts:"* ]]; then
+            current_section="expected_inputs_artifacts"
+        elif [[ $line == *"Tags:"* ]]; then
+            current_section="tags"
+        elif [[ $line == *"Task Image ID:"* ]]; then
+            task_id=$(echo "$output" | grep 'Task Image ID:' | awk '{print $4}')
+        elif [[ $line == *"-"* ]]; then
+            case $current_section in
+                "expected_outputs")
+                    expected_outputs+=("$(echo ${line#*-} | tr -d ' ')")
+                    ;;
+                "expected_inputs_runtime")
+                    if [[ $line == *"- name"* ]]; then
+                        line=$(echo "$line" | sed 's/ name: //')
+                        expected_inputs_runtime+=("${line#*-}")
+                    fi
+                    ;;
+                "expected_inputs_artifacts")
+                    line=$(echo "$line" | sed 's/ name: //')
+                    expected_inputs_artifacts+=("${line#*-}")
+                    ;;
+                "tags")
+                    tags+=("$(echo ${line#*-} | tr -d ' ')")
+                    ;;
+            esac
+        else
+            current_section=""
+        fi
+    done <<< "$output"
+    # Output the collected data
+    echo "Task image ID: "
+    printf '%s\n' "$task_id"
+    echo ""
+    echo "Expected Outputs:"
+    printf '%s\n' "${expected_outputs[@]}"
+    echo ""
+    echo "Expected Inputs/Runtime:"
+    printf '%s\n' "${expected_inputs_runtime[@]}"
+    echo ""
+    echo "Expected Inputs/Artifacts:"
+    printf '%s\n' "${expected_inputs_artifacts[@]}"
+    echo ""
+    echo "Tags"
+    printf '%s\n' "${tags[@]}"
+    echo ""
+    echo ""
+    
+    # INPUT
+    local version
+    local i
+
+    length=${#expected_outputs[@]}
+    for ((i=1; i<=$length; i++)); do
+        read "version?Enter version for ${expected_outputs[i]}: " 
+        expected_outputs[i]="${expected_outputs[i]}:$version"
+    done
+    echo "Expected Outputs:"
+    printf '%s\n' "${expected_outputs[@]}"
+    echo ""
+
+    length=${#expected_inputs_runtime[@]}
+    for ((i=1; i<=$length; i++)); do
+        read "version?Enter input for  ${expected_inputs_runtime[i]}: " 
+        expected_inputs_runtime[i]="${expected_inputs_runtime[i]}:$version"
+    done
+    echo "Expected Outputs:"
+    printf '%s\n' "${expected_inputs_runtime[@]}"
+    echo ""
+
+    length=${#expected_inputs_artifacts[@]}
+    for ((i=1; i<=$length; i++)); do
+        read "version?Enter ID for  ${expected_inputs_artifacts[i]}: " 
+        expected_inputs_artifacts[i]="${expected_inputs_artifacts[i]}:$version"
+    done
+    echo "Expected Outputs:"
+    printf '%s\n' "${expected_inputs_artifacts[@]}"
+    echo ""
+}
+
+
+
+
+function check_deployment_status() {
+  local version output 
+  version=$1
+
+  toast "🛠️ Starting task preparation"
+  while true; do
+    local current_status
+    output=$(fda task-image info "$version")
+    current_status=$(echo "$output" | grep -o 'Status: .*' | sed 's/Status: //' | sed 's/^ *//;s/ *$//')
+    if [[ $current_status == *"PREPARED"* ]]; then
+        toast "✅ Task preparation done!"
+        break
+    elif [[ $current_status == *"STARTING PREPARE"* || 
+        $current_status == *"'PREPARE VALIDATION'"* ]]; then
+        continue
+    elif [[ $current_status == *"PREPARING"* || 
+        $current_status == *''* ]]; then
+        continue
+    else
+        toast-error "🚫 Task preparation Failed!"
+        echo "Error: Unexpected status: '$current_status'"
+        echo "Errors:"
+        errors=$(echo "$output" | grep -A9999 'Errors:' | sed -n '/Errors:/,$p' | grep '^ *-')
+        echo "$errors"
+        return 1  # Stop execution with error
+    fi    # echo only the Status line from the output
+    echo -e "\r\033$current_status"
+    sleep 7
   done
 
   echo "$output"
@@ -73,4 +220,15 @@ function fdap() {
 }
 
 alias cds="check_deployment_status"
+alias crs="check_run_status"
 alias fdap="fdap"
+
+function fdarp() {
+    python3 /Users/julianramire/dotfiles/fda_funcs.py "$@"
+}
+
+function fdapp(){
+    python3 /Users/julianramire/dotfiles/fda_prepare_funcs.py
+}
+alias fdarp="fdarp"
+alias fdapp="fdapp"
