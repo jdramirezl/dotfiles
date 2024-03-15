@@ -161,7 +161,74 @@ class Task:
                     print(f"{SEPARATOR} No tasks related to this Task-Image")
                     continue
 
-                break
+                # Get the task id
+                task_id = task["visible_id"]
+
+                single_task = fda.get_task(task_id)
+
+                # Get the inputs and outputs
+                inputs = single_task["task_inputs"]
+                input_artifacts = inputs.get("artifacts", [])
+                input_runtime = inputs.get("runtime", [])
+                outputs = single_task.get("task_outputs", [])
+                flavor = single_task["params"]["flavor"]
+                criticality_settings = single_task["params"]["criticality_settings"]
+
+                print(input_artifacts, input_runtime)
+                print(outputs)
+                print(flavor, criticality_settings)
+
+                """
+                {
+                  "params": {
+                    "criticality_settings": {
+                      "additionalProp1": "string",
+                      "additionalProp2": "string",
+                      "additionalProp3": "string"
+                    },
+                    "inputs": {
+                      "artifacts": [
+                        {
+                          "id": "string",
+                          "version_expression": "string",
+                          "alias": "string"
+                        }
+                      ],
+                      "params": {
+                        "additionalProp1": "string",
+                        "additionalProp2": "string",
+                        "additionalProp3": "string"
+                      }
+                    },
+                    "outputs_versions": {
+                      "additionalProp1": "string",
+                      "additionalProp2": "string",
+                      "additionalProp3": "string"
+                    },
+                    "flavor": "string",
+                    "external_params": {
+                      "additionalProp1": "string",
+                      "additionalProp2": "string",
+                      "additionalProp3": "string"
+                    },
+                    "retry": {
+                      "repetitions": 3
+                    },
+                    "tags": [
+                      "string"
+                    ]
+                  },
+                  "external_parameters": {
+                    "additionalProp1": "string",
+                    "additionalProp2": "string",
+                    "additionalProp3": "string"
+                  },
+                  "task_image": "string",
+                  "description": "string",
+                  "tags": [
+                    "string"
+                  ]
+                }"""
 
             if use_params == 3:
                 print("No")

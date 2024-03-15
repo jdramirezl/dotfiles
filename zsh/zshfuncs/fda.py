@@ -88,6 +88,9 @@ class FDA:
             "x-tiger-token": f"Bearer {self.token}",
         }
 
+        print(url)
+
+
         response_dict, status = self._make_request(url, "GET", payload)
 
         task_images = response_dict["results"]
@@ -106,6 +109,8 @@ class FDA:
         headers = {
             "x-tiger-token": f"Bearer {self.token}",
         }
+
+        print(url)
 
         response_dict, status = self._make_request(url, "GET", payload)
 
@@ -256,7 +261,7 @@ class FDA:
 
         # Get the task-image name, tags, inputs and outputs
 
-        return response_dict
+        return {}
 
     def get_artifacts(self) -> list:
         # We dont have an api for this, lets call a cli command
@@ -281,3 +286,21 @@ class FDA:
         artifacts = [dict(zip(headers, artifact)) for artifact in artifacts]
 
         return artifacts
+
+
+fda = FDA()
+fda.get_task_images()
+# task = fda.get_task("5ef637b0-7eb4-471a-ba09-8b8177823524")
+# for key, value in task.items():
+#     # Print the key
+#     print(key)
+
+#     try:
+#         for k, v in value.items():
+#             # prnt key with one color and value with another
+#             print(
+#                 f"\t{bcolors.OKGREEN}{k}{bcolors.ENDC}: {bcolors.OKBLUE}{v}{bcolors.ENDC}"
+#             )
+#     except AttributeError:
+#         # print with color
+#         print(f"\t{bcolors.OKGREEN}{value}{bcolors.ENDC}")
