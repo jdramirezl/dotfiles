@@ -3,7 +3,7 @@ import os
 
 from typing import Union, List
 
-from src.utils import GitHub
+from src.utils import GitHub, File
 from src.repository import (
     TaskImageAPIRepository,
     TaskAPIRepository,
@@ -26,8 +26,6 @@ from src.constants.fda import FDA_FILE
 from src.constants.artifact import ARTIFACT_LOCAL_FILE
 from src.constants.task_image import TASK_IMAGE_LOCAL_FILE
 from src.constants.general import PRINT
-
-from src.utils import File
 
 from src.settings import settings
 
@@ -107,18 +105,18 @@ class FDA:
         task_service = TaskService(api_repository)
         task_service.create(task)
 
-    def get_local_tasks(self) -> List[TaskImageModel]:
-        local_repository = TaskLocalRepository({
-            "task_image_file": self.root_path + "/" + TASK_IMAGE_LOCAL_FILE
-        })
-        
+    def get_local_tasks(self) -> List[TaskModel]:
+        local_repository = TaskLocalRepository(
+            {"task_image_file": self.root_path + "/" + TASK_IMAGE_LOCAL_FILE}
+        )
+
         service = TaskImageService(local_repository)
         return service.get_all()
-    
+
     def get_local_artifacts(self) -> List[ArtifactModel]:
-        local_repository = ArtifactLocalRepository({
-            "artifact_file": self.root_path + "/" + ARTIFACT_LOCAL_FILE
-        })
-        
+        local_repository = ArtifactLocalRepository(
+            {"artifact_file": self.root_path + "/" + ARTIFACT_LOCAL_FILE}
+        )
+
         service = ArtifactService(local_repository)
         return service.get_all()

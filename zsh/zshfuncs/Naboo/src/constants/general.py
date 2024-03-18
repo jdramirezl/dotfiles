@@ -34,3 +34,6 @@ class PRINT:
     PRINT_LEN_LOW = 7
 
 
+class FURY_URLS:
+    # Fury URL
+    FURY_URL = "https://web.furycloud.io/"

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from src.model import TaskModel
+from src.model import TaskModel, ArtifactModel
 from src.repository import TaskRepository
 
 
@@ -21,31 +21,20 @@ class TaskService:
         tasks = self.get_all()
         return [task for task in tasks if task.username == username]
 
-    def get_by_image_name(self, task_image_name: str) -> List[TaskModel]:
+    def get_by_name(self, name: str) -> List[TaskModel]:
         tasks = self.get_all()
-        return [task for task in tasks if task.task_image_name == task_image_name]
+        return [task for task in tasks if task.name == name]
 
-    def get_by_image_version(self, task_image_version: str) -> List[TaskModel]:
+    def get_by_version(self, version: str) -> List[TaskModel]:
         tasks = self.get_all()
-        return [task for task in tasks if task.task_image_version == task_image_version]
+        return [task for task in tasks if task.version == version]
 
-    def get_by_image_name_and_version(
-        self, task_image_name: str, task_image_version: str
-    ) -> List[TaskModel]:
+    def get_by_name_and_version(self, name: str, version: str) -> List[TaskModel]:
+        tasks = self.get_all()
+        return [task for task in tasks if task.name == name and task.version == version]
+
+    def get_by_username_and_name(self, username: str, name: str) -> List[TaskModel]:
         tasks = self.get_all()
         return [
-            task
-            for task in tasks
-            if task.task_image_name == task_image_name
-            and task.task_image_version == task_image_version
-        ]
-
-    def get_by_username_and_image_name(
-        self, username: str, task_image_name: str
-    ) -> List[TaskModel]:
-        tasks = self.get_all()
-        return [
-            task
-            for task in tasks
-            if task.username == username and task.task_image_name == task_image_name
+            task for task in tasks if task.username == username and task.name == name
         ]

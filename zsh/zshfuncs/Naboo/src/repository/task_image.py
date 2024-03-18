@@ -43,24 +43,18 @@ class TaskImageAPIRepository(TaskImageRepository):
 
     def get(self, task_image_id: str) -> TaskImageModel:
         url = f"{self.URL}{task_image_id}/"
-
-        print(f"Getting task image with id: {task_image_id}")
-        response, status = Request.get(url, self.get_payload, self.headers)
+        response, _ = Request.get(url, self.get_payload, self.headers)
         task_image = TaskImageModel(response)
         return task_image
 
     def get_all(self) -> List[TaskImageModel]:
         url = self.URL
-
-        print(f"Getting all task images")
-        response, status = Request.get(url, self.get_payload, self.headers)
+        response, _ = Request.get(url, self.get_payload, self.headers)
         task_images = [TaskImageModel(task_image) for task_image in response["results"]]
         return task_images
 
     def post(self, task_image: TaskImageModel) -> None:
         url = self.URL
-
-        print(f"Putting task image with id: {task_image.visible_id}")
         payload = task_image.to_post_dict()
         Request.post(url, payload, self.headers)
 

@@ -49,3 +49,5 @@ class GitHub:
     def get_usernames_from_email(self, email: str):
         return self.git.log("--all", "--author=" + email).split("\n")
 
+    def get_commit_message(self, commit: str):
+        return self.repo.commit(commit).message

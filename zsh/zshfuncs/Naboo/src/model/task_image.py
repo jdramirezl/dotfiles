@@ -1,4 +1,4 @@
-from src.utils import format_date
+from src.utils import utils
 from src.settings import settings
 from src.constants.general import COLORS
 
@@ -42,7 +42,7 @@ class TaskImageModel:
         self.errors = task_image.get("errors", "")
 
     def format_date(self, date: str) -> str:
-        return format_date(date)
+        return utils.format_date(date)
 
     def update_from_dict(self, task_image: dict = {}):
         for key, value in task_image.items():

@@ -17,24 +17,24 @@ class TaskImageService:
     def get_all(self) -> List[TaskImageModel]:
         return self.repository.get_all()
 
-    def get_by_name(self, task_image_name: str) -> List[TaskImageModel]:
+    def get_by_name(self, name: str) -> List[TaskImageModel]:
         task_images = self.get_all()
-        return [task_image for task_image in task_images if task_image.name == task_image_name]
+        return [task_image for task_image in task_images if task_image.name == name]
 
-    def get_by_version(self, task_image_version: str) -> List[TaskImageModel]:
+    def get_by_version(self, version: str) -> List[TaskImageModel]:
         task_images = self.get_all()
         return [
-            task_image for task_image in task_images if task_image.version == task_image_version
+            task_image for task_image in task_images if task_image.version == version
         ]
 
     def get_by_name_and_version(
-        self, task_image_name: str, task_image_version: str
+        self, name: str, version: str
     ) -> Optional[TaskImageModel]:
         task_images = self.get_all()
         for task_image in task_images:
             if (
-                task_image.name == task_image_name
-                and task_image.version == task_image_version
+                task_image.name == name
+                and task_image.version == version
             ):
                 return task_image
         return None

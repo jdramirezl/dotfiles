@@ -1,7 +1,9 @@
 from typing import Dict
+import datetime
 
-from src.utils import format_date
+from src.utils import utils
 from src.constants.general import COLORS
+
 
 class ArtifactModel:
     # init based on the json above with names joined by underscores and in lowercase
@@ -29,12 +31,22 @@ class ArtifactModel:
                     setattr(self, key, value)
 
     def format_date(self, date: str = ""):
-        return format_date(date)
+        if not date:
+            return date  # '2024-03-13 17:00'
+        datetime_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
+        formatted_date = datetime_obj.strftime("%B %d, %Y at %I:%M %p")
+        return formatted_date
 
     def __str__(self):
         output = ""
-        for key, value in self.__dict__.items():
-            output += f"{COLORS.BLUE}{key}{COLORS.END}: {value}\n"
+        # for key, value in self.__dict__.items():
+        #     output += f"{COLORS.BLUE}{key}{COLORS.ENDC}: {value}\n"
+
+        # only print the id, name, version, type, status, and creation date
+        keys = ["id", "name", "version", "type", "status", "creation_date"]
+        for key in keys:
+            output += f"{COLORS.BLUE}{key}{COLORS.ENDC}: {self.__dict__[key]}\n"
+
         return output
 
     def to_artifact_dict(self) -> Dict[str, str]:
@@ -52,3 +64,6 @@ class ArtifactModel:
         return {
             self.name: self.version,
         }
+
+    def increase_version(self):
+        self.version = utils.increase_version(self.version)

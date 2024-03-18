@@ -53,8 +53,9 @@ class TaskAPIRepository(TaskRepository):
 
     def post(self, task: TaskModel) -> None:
         url = f"{self.URL}"
-        payload = task.to_dict()
+        payload = task.to_post_dict()
         response, status = Request.post(url, payload, self.headers)
+
 
 class TaskLocalRepository(TaskRepository):
     def __init__(self, config: dict = {}) -> None:
@@ -79,7 +80,7 @@ class TaskLocalRepository(TaskRepository):
         # filter
         tasks = tasks["tasks"]
         del tasks["def_version"]
-        
+
         serialized_tasks = []
         for name, body in tasks.items():
             inputs = body.get("inputs", {})
@@ -92,36 +93,34 @@ class TaskLocalRepository(TaskRepository):
                 for artifact_input in artifact_inputs
             ]
 
-            runtime_inputs = inputs.get("params", [])
+            runtime_inputs = inputs.get("runtime", [])
             runtime_inputs = {
-                runtime_input["name"]: runtime_input["default"]
+                runtime_input["name"]: runtime_input.get("default", "")
                 for runtime_input in runtime_inputs
             }
 
             outputs = body.get("outputs", [])
-            outputs = {
-                output: ""
-                for output in outputs
-            }
+            outputs = {output: "" for output in outputs}
             task = TaskModel(
                 {
-                    "name": name,
+                    "task_image_name": name,
                     "task_type": body["type"],
-                    "flavor": body["context"]["flavor"],
                     "params": {
                         "entrypoint": body["context"]["entrypoint"],
                         "inputs": {
                             "artifacts": artifact_inputs,
                             "params": runtime_inputs,
                         },
-                        "outputs": outputs,
+                        "outputs_versions": outputs,
+                        "flavor": body["context"]["flavor"],
                     },
                 }
             )
-            
+
             serialized_tasks.append(task)
 
         return serialized_tasks
 
     def post(self, task: TaskModel) -> None:
         pass
+
