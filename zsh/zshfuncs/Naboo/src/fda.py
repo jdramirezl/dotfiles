@@ -71,25 +71,31 @@ class FDA:
 
         loading_icons = PRINT.LOADING_ICONS
         loading_index = 0
+        image = service.get(id)
 
         while True:
+            errors = image.errors
+            logerrors = image.logs_stderr
+            status = image.status
+
+            if image.status == "DONE":
+                break
+            if errors or "ERROR" in image.status:
+                print(
+                    f"Error: Unexpected status: '{image.status}'\nErrors:\n{errors}\nLogs:\n{logerrors}"
+                )
+                return False
+
             if (datetime.datetime.now() - check_curr_time).seconds > 7:
                 check_curr_time = datetime.datetime.now()
                 image = service.get(id)
-                if "DONE" in image.status:
-                    break
-
-                errors = image.errors
-                logerrors = image.logs_stderr
-                if errors or "ERROR" in image.status:
-                    print(
-                        f"Error: Unexpected status: '{image.status}'\nErrors:\n{errors}\nLogs:\n{logerrors}"
-                    )
-                    return False
 
             if (datetime.datetime.now() - print_curr_time).seconds > 0.1:
                 print_curr_time = datetime.datetime.now()
-                print(f"STATUS: RUNNING {loading_icons[loading_index]}", end="\r")
+                print(
+                    f"STATUS: RUNNING {status} {loading_icons[loading_index]}",
+                    end="\r",
+                )
                 loading_index = (loading_index + 1) % len(loading_icons)
 
         print(f"STATUS: DONE", " " * 10)

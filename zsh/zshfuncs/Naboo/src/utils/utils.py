@@ -93,3 +93,10 @@ def increase_version(version: str) -> str:
         version = version[: match.start()] + new_last_number + version[match.end() :]
 
     return version
+
+
+# Delete printed lines
+def clear_lines(n: int):
+    s = "                                                                                                                                      ing"
+    for _ in range(n):
+        print("\033[A" + " " * len(s) + "\033[A")

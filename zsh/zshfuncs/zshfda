@@ -1,17 +1,21 @@
 
 function fdar() {
-    python /Users/julianramire/dotfiles/fda_prepare_funcs.py "task" "run" "$@"
+    python /Users/julianramire/dotfiles/Naboo/main.py "task" "run" "$@"
 }
 
 function cds(){
-    python /Users/julianramire/dotfiles/fda_prepare_funcs.py "task-image" "check" "$@"
+    python /Users/julianramire/dotfiles/Naboo/main.py "task-image" "check" "$@"
 }
 
 function fdap(){
-    python /Users/julianramire/dotfiles/fda_prepare_funcs.py "task-image" "prepare" "$@"
+    python /Users/julianramire/dotfiles/Naboo/main.py "task-image" "prepare" "$@"
 }
 
-alias crs="check_run_status"
+function crs(){
+    python /Users/julianramire/dotfiles/Naboo/main.py "task" "check" "$@"
+}
+
+alias crs="crs"
 alias cds="cds"
 alias fdap="fdap"
 alias fdar="fdar"

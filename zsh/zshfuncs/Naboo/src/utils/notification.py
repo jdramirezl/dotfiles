@@ -10,16 +10,27 @@ class Toast:
 
     @staticmethod
     def notify(title, subtitle, message, state, url):
-        sound = Toast.sounds[state]
-        sound = "-sound {}".format(sound) if sound else ""
+        parts = []
+        if state:
+            sound = Toast.sounds[state]
+            sound = "-sound {}".format(sound) if sound else ""
+            parts.append(sound)
 
-        t = "-title {!r}".format(title)
-        s = "-subtitle {!r}".format(subtitle)
-        m = "-message {!r}".format(message)
-        u = "-open {!r}".format(url)
-        # remove os.system output
+        if title:
+            parts.append("-title {!r}".format(title))
+
+        if subtitle:
+            parts.append("-subtitle {!r}".format(subtitle))
+
+        if message:
+            parts.append("-message {!r}".format(message))
+
+        if url:
+            parts.append("-open {!r}".format(url))
+
         os.system(
-            "terminal-notifier {} >/dev/null 2>&1".format(" ".join([m, t, s, u, sound]))
+            # "terminal-notifier {} >/dev/null 2>&1".format(" ".join([m, t, s, u, sound]))
+            "terminal-notifier {}".format(" ".join(parts))
         )
 
     @staticmethod
@@ -46,4 +57,3 @@ class Toast:
     def info(subtitle: str, message: str = "", url: str = ""):
         title = "Naboo - Execution Info"
         Toast.notify(title, subtitle, message, "running", url)
-

@@ -50,10 +50,12 @@ class ArtifactModel:
         return output
 
     def to_artifact_dict(self) -> Dict[str, str]:
-        return {
-            "id": self.id,
-            "alias": self.name,
-        }
+        """
+        "id": "string",
+          "version_expression": "string",
+          "alias": "string"
+        """
+        return {"id": self.id, "version_expression": self.version, "alias": self.name}
 
     def to_runtime_dict(self) -> Dict[str, str]:
         return {

@@ -23,6 +23,8 @@ class TaskModel:
             "criticality_settings", {"level": "test"}
         )
 
+        self.criticality_level = self.criticality_settings.get("level", "test")
+
         # Inputs
         inputs = self.params.get("inputs", {})
         runtime_inputs = inputs.get("params", {})
@@ -84,50 +86,35 @@ class TaskModel:
 
     def update_from_other_task(self, task: "TaskModel") -> None:
         # print: old value -> new value
-        self.print_change(
-            self.flavor,
-            task.flavor,
-            "Flavor",
-        )
+        # self.print_change(
+        #     self.flavor,
+        #     task.flavor,
+        #     "Flavor",
+        # )
         self.flavor = task.flavor
 
         # Add new tags only
         for tag in task.tags:
             if tag not in self.tags:
-                self.print_change("", tag, "Tag")
+                # self.print_change("", tag, "Tag")
                 self.tags.append(tag)
 
         # Update inputs that exist in both tasks, dont add new ones or remove old ones
         for input in task.runtime_inputs:
             for self_input in self.runtime_inputs:
                 if input.name == self_input.name:
-                    self.print_change(
-                        self_input.value,
-                        input.value,
-                        f"Runtime Input: {input.name}",
-                    )
                     self_input.value = input.value
 
         # Update inputs that exist in both tasks, dont add new ones or remove old ones
         for input in task.artifact_inputs:
             for self_input in self.artifact_inputs:
                 if input.name == self_input.name:
-                    self.print_change(
-                        self_input.id,
-                        input.id,
-                        f"Artifact Input: {input.name}",
-                    )
                     self_input.id = input.id
 
         # Update outputs that exist in both tasks, dont add new ones or remove old ones
         for output in task.outputs_versions:
             for self_output in self.outputs_versions:
                 if output.name == self_output.name:
-                    self.print_change(
-                        self_output.version,
-                        output.version,
-                        f"Output: {output.name}",
-                    )
                     self_output.version = output.version
 
     def to_post_dict(self) -> dict:
@@ -145,13 +132,18 @@ class TaskModel:
 
         body = {
             "params": {
-                "criticality_settings": self.criticality_settings,
+                "criticality_settings": {
+                    "level": self.criticality_level,
+                },
                 "inputs": {
                     "artifacts": input_artifacts,
                     "params": runtime_params,
                 },
                 "outputs_versions": output_params,
                 "flavor": self.flavor,
+                "retry": {
+                    "repetitions": 0,
+                },
             },
             "task_image": self.task_image_id,
             "tags": self.tags,
@@ -167,7 +159,7 @@ class TaskModel:
         lines.append([f"{COLORS.BOLD}Task{COLORS.ENDC}", base_indent])
         lines.append(["Params", base_indent + 1])
         lines.append(["Criticality Settings", base_indent + 2])
-        lines.append([f"Level: {self.criticality_settings['level']}", base_indent + 3])
+        lines.append([f"Level: {self.criticality_level}", base_indent + 3])
         lines.append(["Inputs", base_indent + 1])
         lines.append(["Artifacts", base_indent + 2])
         for artifact in self.artifact_inputs:

@@ -1,3 +1,5 @@
+import os
+
 from abc import abstractmethod
 from typing import List
 
@@ -55,6 +57,57 @@ class TaskAPIRepository(TaskRepository):
         url = f"{self.URL}"
         payload = task.to_post_dict()
         response, status = Request.post(url, payload, self.headers)
+
+
+class TaskCLIRepository(TaskRepository):
+    def get(self, task_id: str) -> TaskModel:
+        raise Exception("Not implemented")
+
+    def get_all(self) -> List[TaskModel]:
+        raise Exception("Not implemented")
+
+    def post(self, task: TaskModel) -> None:
+        """
+        The CLI command to run a task is:
+            fda run --input-param name:value (for each input param) --input-artifact-id name:id (for each input artifact) --output-version name:version (for each output version) --flavor <flavor> --tag tag (for each tag) <task_image_id>
+        """
+        # get the task image id
+        task_image_id = task.task_image_id
+
+        # get the inputs
+        input_params = task.runtime_inputs
+        input_artifacts = task.artifact_inputs
+
+        # get the outputs
+        outputs = task.outputs_versions
+
+        # get the flavor
+        flavor = task.flavor
+
+        # get the tags
+        tags = task.tags
+
+        # get the criticality level
+        criticality_level = task.criticality_level
+
+        # build the command
+        command = "fda run"
+        for input_param in input_params:
+            command += f" --input-param {input_param.name}:{input_param.value}"
+        for input_artifact in input_artifacts:
+            command += f" --input-artifact-id {input_artifact.name}:{input_artifact.id}"
+        for output in outputs:
+            command += f" --output-version {output.name}:{output.version}"
+        command += f" --flavor {flavor}"
+        command += f" --criticality-level {criticality_level}"
+        for tag in tags:
+            tag = tag["name"]
+            command += f" --tag {tag}"
+        command += f" {task_image_id}"
+
+        # run the command
+        print(f"Running the command: {command}")
+        os.system(command)
 
 
 class TaskLocalRepository(TaskRepository):
@@ -123,4 +176,3 @@ class TaskLocalRepository(TaskRepository):
 
     def post(self, task: TaskModel) -> None:
         pass
-

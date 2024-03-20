@@ -34,7 +34,7 @@ from src.gui.gui import GUI
 
 
 class TaskImageGUI(GUI):
-    def __init__(self, master, task):
+    def __init__(self):
         super().__init__()
 
     def check_image_prepare(self) -> None:
@@ -44,11 +44,15 @@ class TaskImageGUI(GUI):
         service = self.task_image_service
         task = self.choose(service)
 
+        if task is None:
+            print(f"{PRINT.SEPARATOR} No task available")
+            return
+
         # Get the new version
         new_version = utils.increase_version(task.version)
 
         # Ask the user to confirm the new version or change it
-        print(f"{PRINT.SEPARATOR} The new version is {new_version}")
+        print(f"{PRINT.SEPARATOR} The new version would be {new_version}")
         confirm = input("Do you want to use it ? (y/n): ")
         if confirm.lower() != "y":
             new_version = input("Enter the new version: ")
@@ -64,9 +68,6 @@ class TaskImageGUI(GUI):
         # Get every keys
         path_list = []
         values_to_change = utils.tree_to_list(task_image_body, [], path_list)
-        print(f"{PRINT.SEPARATOR} The keys to change:")
-        for value in values_to_change:
-            print(value)
 
         # Get the commit message
         commit = task.commit_id

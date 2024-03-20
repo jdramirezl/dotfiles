@@ -47,7 +47,7 @@ class GUI:
         self.task_image_repository = TaskImageAPIRepository()
         self.task_image_service = TaskImageService(self.task_image_repository)
 
-    def _select(self, options: list) -> int:
+    def _select(self, options: list, PAGE_MAX: int = 5) -> int:
         # Do the same as above but implement a pagination
         print(
             f"{PRINT.SEPARATOR} Choose a number or use n/p to navigate through the options:"
@@ -56,18 +56,20 @@ class GUI:
         while True:
             output = ""
             lines_to_print = []
-            # print(f"Page {page + 1}/{ceil(len(options) / 5)}")
-            lines_to_print.append(f"Page {page + 1}/{ceil(len(options) / 5)}")
-            n_of_options = min(5, len(options) - page * 5)
-            for i, option in enumerate(options[page * 5 : page * 5 + n_of_options]):
+            # print(f"Page {page + 1}/{ceil(len(options) / PAGE_MAX)}")
+            lines_to_print.append(f"Page {page + 1}/{ceil(len(options) / PAGE_MAX)}")
+            n_of_options = min(PAGE_MAX, len(options) - page * PAGE_MAX)
+            for i, option in enumerate(
+                options[page * PAGE_MAX : page * PAGE_MAX + n_of_options]
+            ):
                 string = ""
                 for element in option:
-                    string += element + " " * 5
+                    string += element + " " * PAGE_MAX
                 index = i + 1
-                string = f"{utils.limit_str(str(index), 5)}" + string
+                string = f"{utils.limit_str(str(index), PAGE_MAX)}" + string
                 lines_to_print.append(string)
-            # If there are less than 5 options, print empty lines
-            for _ in range(5 - n_of_options - 1):
+            # If there are less than PAGE_MAX options, print empty lines
+            for _ in range(PAGE_MAX - n_of_options - 1):
                 lines_to_print.append("")
 
             for line in lines_to_print:
@@ -75,21 +77,17 @@ class GUI:
             print(output)
             choice = input("Enter the number of the option: ")
 
+            utils.clear_lines(len(lines_to_print) + 2)
             # if choice is empty, or is not a number, or is not in the range, print an error
             if choice == "n":
-                page = min(page + 1, ceil(len(options) / 5) - 1)
+                page = min(page + 1, ceil(len(options) / PAGE_MAX) - 1)
             elif choice == "p":
                 page = max(page - 1, 0)
             elif not choice or not choice.isdigit() or int(choice) - 1 > n_of_options:
                 pass
             else:
-                return int(choice) - 1
-
-            # clear the printed options
-            for _ in range(len(lines_to_print) + 2):
-                print("\033[A                                      \033[A")
-
-        return int(choice) - 1
+                utils.clear_lines(1)
+                return int(choice) - 1 + page * PAGE_MAX
 
     def _select_multiple(self, options: list, separator: str = " " * 5) -> List[int]:
         selected = []
@@ -98,12 +96,6 @@ class GUI:
             output = ""
             for i, option in enumerate(options):
                 string = ""
-                # for j, element in enumerate(option):
-                #     if j != len(option) - 1:
-                #         string += element + separator
-                #     else:
-                #         string += element
-                # if element is iterable, join it with the separator
                 if isinstance(option, list):
                     string = separator.join(option)
                 else:
@@ -125,8 +117,7 @@ class GUI:
                 selected.append(int(choice) - 1)
 
             # clear the printed options
-            for _ in range(len(options) + 2):
-                print("\033[A                                      \033[A")
+            utils.clear_lines(len(options) + 2)
 
         return selected
 
@@ -142,11 +133,12 @@ class GUI:
         ]
         index = self._select(options)
         local_image = local_images[index]
+        utils.clear_lines(1)
         return local_image
 
     def choose(
         self, service: Union[TaskService, TaskImageService]
-    ) -> Union[TaskModel, TaskImageModel]:
+    ) -> Union[TaskModel, TaskImageModel, None]:
         # Get the local task images
         local_task = self.choose_local_task()
         local_task_name = local_task.name
@@ -157,7 +149,7 @@ class GUI:
         self,
         name: str,
         service: Union[TaskService, TaskImageService],
-    ) -> Union[TaskModel, TaskImageModel]:
+    ) -> Union[TaskModel, TaskImageModel, None]:
         tasks = service.get_by_name(name)
 
         # Sort by creation date
@@ -191,10 +183,15 @@ class GUI:
 
             options.append(option)
 
+        if not options:
+            print(f"{PRINT.SEPARATOR} No tasks found")
+            return None
+
         print(f"{PRINT.SEPARATOR} Choose a version:")
         index = self._select(options)
         selected_task = tasks[index]
         selected_task = service.get(selected_task.visible_id)
+        utils.clear_lines(1)
         return selected_task
 
     def check_status(
@@ -208,16 +205,25 @@ class GUI:
         else:
             task = model
 
+        if not task:
+            print(f"{PRINT.SEPARATOR} No task available")
+            return None
+
         # Send a toast
         Toast.info(
             MESSAGES.STARTING,
             f"Checking the status of the task {task.name}:{task.version}",
         )
 
+        print(
+            f"{PRINT.SEPARATOR} Checking the status of the task {task.name}:{task.version}"
+        )
+
         # Start a timer
         start = datetime.datetime.now()
 
         # Check its status
+        print(f"id: {task.visible_id}")
         status = self.fda.check_status(task.visible_id, service)
 
         # End the timer

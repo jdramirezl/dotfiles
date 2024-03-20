@@ -11,6 +11,7 @@ from src.repository import (
     TaskImageAPIRepository,
     TaskLocalRepository,
     TaskAPIRepository,
+    TaskCLIRepository,
 )
 from src.model import (
     ArtifactModel,
@@ -54,39 +55,37 @@ class TaskGUI(GUI):
             print(f"{TASK_MESSAGES.FAILURE} No artifacts found")
             return
 
-        print(f"artifacts: {artifacts}")
-
         # 2. Let the user choose one of the versions
         index = self._select([[artifact.version] for artifact in artifacts])
         new_version = artifacts[index]
 
         # 2. Update the artifact
-        artifact.name = new_version.name
-        artifact.version = new_version.version
+        # iter through the artifacts attributes
+        for attribute in new_version.__dict__:
+            setattr(artifact, attribute, getattr(new_version, attribute))
 
-    def update_artifacts_to_latest(
-        self, artifacts: List[ArtifactModel]
-    ) -> List[ArtifactModel]:
+    def update_artifact_to_latest(self, artifact: ArtifactModel) -> ArtifactModel:
         # Get the newest artifact
         repository = ArtifactCLIRepository({})
         artifact_service = ArtifactService(repository)
 
-        for i, artifact in enumerate(artifacts):
-            newest = artifact_service.get_newest(artifact.name)
-            if newest:
-                artifacts[i] = newest
+        newest = artifact_service.get_newest(artifact.name)
 
-        return artifacts
+        return newest if newest else artifact
 
     def autofill_task(self, task: TaskModel) -> None:
         artifact_service = ArtifactService(ArtifactCLIRepository({}))
         artifacts = artifact_service.get_all()
 
         # 1. Autofill the inputs
-        task.artifact_inputs = self.update_artifacts_to_latest(task.artifact_inputs)
+        for i, artifact in enumerate(task.artifact_inputs):
+            # 1a. Autofill the artifact
+            task.artifact_inputs[i] = self.update_artifact_to_latest(artifact)
 
         # 2. Autofill the outputs
-        task.outputs_versions = self.update_artifacts_to_latest(task.outputs_versions)
+        for i, artifact in enumerate(task.outputs_versions):
+            # 2a. Autofill the artifact
+            task.outputs_versions[i] = self.update_artifact_to_latest(artifact)
 
         # 2a. Update the outputs versions
         for artifact in task.outputs_versions:
@@ -96,8 +95,13 @@ class TaskGUI(GUI):
         print(f"{PRINT.SEPARATOR} Choose an old task version to use for the new values")
         old_task = self.choose_with_name(task.name, self.task_service)
 
+        if not old_task:
+            return None
+
         # 1. Update the task with the old task
         task.update_from_other_task(old_task)
+
+        utils.clear_lines(1)
 
     def update_tags(self, task: TaskModel) -> None:
         while True:
@@ -113,9 +117,12 @@ class TaskGUI(GUI):
 
             choice = input("Enter the number of the option: ")
 
+            utils.clear_lines(6 + len(task.tags))
+
             if choice == "1":
                 value = input("Enter the new tag: ")
                 task.tags.append({"name": value})
+                utils.clear_lines(1)
             elif choice == "2":
                 index = self._select([[tag["name"]] for tag in task.tags])
                 task.tags.pop(index)
@@ -124,88 +131,123 @@ class TaskGUI(GUI):
             else:
                 print("Invalid choice")
 
-    def update_artifact_inputs(self, task: TaskModel) -> None:
-        print(f"{PRINT.SEPARATOR} Current artifact inputs:")
-        for i, artifact in enumerate(task.artifact_inputs):
-            print(f"{i+1}. {artifact.name} -> {artifact.version}")
-        # 2. Let the user choose an artifact to update
-        options = [[artifact.name] for artifact in task.artifact_inputs]
-        index = self._select(options)
-        artifact = task.artifact_inputs[index]
-
-        # 3. Start an artifactCLIService and let the user choose a new version for an artiwfact with the same name
+    def update_artifact_input(self, task: TaskModel, artifact: ArtifactModel) -> None:
         self.update_artifact(artifact)
 
-    def update_runtime_inputs(self, task: TaskModel) -> None:
-        print(f"{PRINT.SEPARATOR} Current runtime inputs:")
-        for i, task_input in enumerate(task.runtime_inputs):
-            print(f"{i+1}. {task_input.name} -> {task_input.value}")
-        # 2. Let the user choose an input to update
-        options = [[input.name] for input in task.runtime_inputs]
-        index = self._select(options)
-        task_input = task.runtime_inputs[index]
-
-        # 3. Update the input
+    def update_runtime_inputs(self, task_input: ArtifactModel) -> None:
         value = input("Enter the new value: ")
         task_input.value = value
+        utils.clear_lines(1)
 
-    def update_outputs_versions(self, task: TaskModel) -> None:
-        print(f"{PRINT.SEPARATOR} Current outputs versions:")
-        for i, output in enumerate(task.outputs_versions):
-            print(f"{i+1}. {output.name} -> {output.version}")
-
-        # 2. Let the user choose an output to update
-        options = [[output.name] for output in task.outputs_versions]
-        index = self._select(options)
-        output = task.outputs_versions[index]
-
-        # 3. Update the output
+    def update_outputs_versions(self, output: ArtifactModel) -> None:
         value = input("Enter the new version: ")
         output.version = value
+        utils.clear_lines(1)
+
+    def select_string(self, options, parameter, task: TaskModel) -> None:
+        print(f"{PRINT.SEPARATOR} Choose a {parameter}")
+        index = self._select(options)
+
+        setattr(task, parameter, options[index][0])
+        utils.clear_lines(1)
 
     def update_section_manually(self, task: TaskModel) -> None:
-        # You can:
-        # Change a criticality_settings/level
-        # Change a params/flavor
-        # add or remove tags
-        # or change the params/inputs/artifacts, params/inputs/params, params/outputs_versions but not add or remove them
-
         # 1. Let the user choose a section
         while True:
             # print the task
             print(f"{PRINT.SEPARATOR} The task to be updated:")
-            utils.tree_print(task.to_post_dict())
+            post_dict = task.to_post_dict()
+            utils.tree_print(post_dict)
 
+            # Get the items in each section
+            sections = []
+
+            # for criticality level
+            sections.append(
+                [
+                    # "criticality_settings/level",
+                    f"{COLORS.GREEN}criticality_settings/level{COLORS.ENDC}",
+                    task.criticality_level,
+                    (
+                        self.select_string,
+                        [[level] for level in TASK_CONFIG.CRITICALITY],
+                        "criticality_level",
+                        task,
+                    ),
+                ]
+            )
+
+            # for flavor
+            sections.append(
+                [
+                    # "flavor",
+                    f"{COLORS.GREEN}flavor{COLORS.ENDC}",
+                    task.flavor,
+                    (
+                        self.select_string,
+                        [[flavor] for flavor in TASK_CONFIG.FLAVOR],
+                        "flavor",
+                        task,
+                    ),
+                ]
+            )
+
+            # for tags
+            sections.append(["tags", task.tags, (self.update_tags, task)])
+
+            # for artifact inputs
+            for i, artifact in enumerate(task.artifact_inputs):
+                sections.append(
+                    [
+                        # f"artifact_inputs/{artifact.name} {artifact.version}", printwith color!
+                        f"{COLORS.GREEN}artifact_input -> {artifact.name}{COLORS.ENDC} {artifact.version}",
+                        artifact.id,
+                        (self.update_artifact_input, task, artifact),
+                    ]
+                )
+
+            # for runtime inputs
+            for i, runtime_input in enumerate(task.runtime_inputs):
+                sections.append(
+                    [
+                        # f"runtime_inputs/{runtime_input.name}",
+                        f"{COLORS.GREEN}runtime_input -> {runtime_input.name}{COLORS.ENDC}",
+                        runtime_input.value,
+                        (self.update_runtime_inputs, runtime_input),
+                    ]
+                )
+
+            # for outputs versions
+            for i, output in enumerate(task.outputs_versions):
+                sections.append(
+                    [
+                        # f"outputs_versions/{output.name}",
+                        f"{COLORS.GREEN}output -> {output.name}{COLORS.ENDC}",
+                        output.version,
+                        (self.update_outputs_versions, output),
+                    ]
+                )
+
+            # Add a go back option
+            sections.append([f"{COLORS.RED}Go back{COLORS.ENDC}", None, None])
+
+            # Let the user choose a section
             print(f"{PRINT.SEPARATOR} Choose a section to update")
+            option = lambda x: f"{x[0]}: {x[1]}"
+            index = self._select(
+                [[option(section)] for section in sections], PAGE_MAX=len(sections)
+            )
 
-            print(f"1. Criticality Settings Level")
-            print(f"2. Flavor")
-            print(f"3. Tags")
-            print(f"4. Artifact Inputs")
-            print(f"5. Runtime Inputs")
-            print(f"6. Outputs Versions")
-            print(f"7. Go back")
-
-            choice = input("Enter the number of the option: ")
-
-            if choice == "1":
-                index = self._select([[level] for level in TASK_CONFIG.CRITICALITY])
-                task.criticality_settings["level"] = TASK_CONFIG.CRITICALITY[index]
-            elif choice == "2":
-                index = self._select([[flavor] for flavor in TASK_CONFIG.FLAVOR])
-                task.flavor = TASK_CONFIG.FLAVOR[index]
-            elif choice == "3":
-                self.update_tags(task)
-            elif choice == "4":
-                self.update_artifact_inputs(task)
-            elif choice == "5":
-                self.update_runtime_inputs(task)
-            elif choice == "6":
-                self.update_outputs_versions(task)
-            elif choice == "7":
-                pass
-            else:
+            if index == len(sections) - 1:
+                break
+            elif index > len(sections) - 1:
                 print("Invalid choice")
+                continue
+
+            # Call the function with the parameters
+            function, *parameters = sections[index][2]
+            function(*parameters)
+            utils.clear_lines(len(sections) + 1 + len(post_dict))
 
     def get_task_sections(self, task: TaskModel) -> dict:
         sections = []
@@ -282,7 +324,8 @@ class TaskGUI(GUI):
         # 4. Let the user update parts of the task
         while True:
             print(f"{PRINT.SEPARATOR} The task to be run:")
-            utils.tree_print(local_task.to_post_dict())
+            post_dict = local_task.to_post_dict()
+            utils.tree_print(post_dict)
 
             print(f"{PRINT.SEPARATOR} What do you want to do ?")
             print("1. Run the task")
@@ -292,12 +335,23 @@ class TaskGUI(GUI):
 
             choice = input("Enter the number of the option: ")
 
+            utils.clear_lines(7 + len(post_dict.keys()))
+
             if choice == "1":
                 print(f"{PRINT.SEPARATOR} Running the task...")
-                self.task_service.create(local_task)
+                # self.task_service.create(local_task)
+                # Create a service with CLI
+                repository = TaskCLIRepository()
+                service = TaskService(repository)
+                service.create(local_task)
+
+                # monitor task status
+                self.check_status(self.task_service, TASK_MESSAGES, local_task)
             elif choice == "2":
                 self.update_from_old_task(local_task)
             elif choice == "3":
                 self.update_section_manually(local_task)
+            elif choice == "4":
+                break
             else:
                 print("Invalid choice")
