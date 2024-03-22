@@ -29,27 +29,22 @@ def tree_print(iterable, indent=2):
         print(str(iterable))
 
 
-# make a function that based on an iterable (dict, or list) ir performs a tree recursion
-# but every time it reaches a leaf, it saves it to a list passed as an argument
-# saving the path to the leaf
-def tree_to_list(
-    iterable,
-    result=[],
-    path=[],
-):
+def tree_to_list(iterable, path_list, path=[]) -> list:
+    INDENT = 2
     if isinstance(iterable, dict):
         for key, value in iterable.items():
+            if isinstance(value, dict) or isinstance(value, list):
+                end = "\n"
+            else:
+                end = ": "
             path.append(key)
-            tree_to_list(value, result, path)
+            path_list.append(path[:])
+            tree_to_list(value, path_list, path)
             path.pop()
     elif isinstance(iterable, list):
-        for i, value in enumerate(iterable):
-            path.append(i)
-            tree_to_list(value, result, path)
-            path.pop()
-    else:
-        result.append((path[:], iterable))
-    return result
+        for value in iterable:
+            tree_to_list(value, path_list, path)
+    return path_list
 
 
 # Change nested values in a dict or list based on a path
@@ -97,6 +92,6 @@ def increase_version(version: str) -> str:
 
 # Delete printed lines
 def clear_lines(n: int):
-    s = "                                                                                                                                      ing"
+    s = "5    3.0.0-rc-2                                                                                                                          pending               "
     for _ in range(n):
         print("\033[A" + " " * len(s) + "\033[A")

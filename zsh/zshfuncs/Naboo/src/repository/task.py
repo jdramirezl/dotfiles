@@ -23,7 +23,7 @@ class TaskRepository(Repository):
         pass
 
     @abstractmethod
-    def post(self, task: TaskModel) -> None:
+    def post(self, task: TaskModel) -> str:  # return the id
         pass
 
 
@@ -53,10 +53,11 @@ class TaskAPIRepository(TaskRepository):
         response, status = Request.get(url, self.get_payload, self.headers)
         return [TaskModel(task) for task in response["results"]]
 
-    def post(self, task: TaskModel) -> None:
+    def post(self, task: TaskModel) -> str:
         url = f"{self.URL}"
         payload = task.to_post_dict()
         response, status = Request.post(url, payload, self.headers)
+        return response["id"]
 
 
 class TaskCLIRepository(TaskRepository):
@@ -66,11 +67,7 @@ class TaskCLIRepository(TaskRepository):
     def get_all(self) -> List[TaskModel]:
         raise Exception("Not implemented")
 
-    def post(self, task: TaskModel) -> None:
-        """
-        The CLI command to run a task is:
-            fda run --input-param name:value (for each input param) --input-artifact-id name:id (for each input artifact) --output-version name:version (for each output version) --flavor <flavor> --tag tag (for each tag) <task_image_id>
-        """
+    def post(self, task: TaskModel) -> str:
         # get the task image id
         task_image_id = task.task_image_id
 
@@ -107,7 +104,18 @@ class TaskCLIRepository(TaskRepository):
 
         # run the command
         print(f"Running the command: {command}")
-        os.system(command)
+        # os.system(command)
+
+        # execute the command and get the output
+        output = os.popen(command).read()
+
+        # parse the output
+        output = output.split("\n")
+        # delete empty lines
+        output = [line for line in output if line]
+        # get the task id
+        task_id = output[1].split(": ")[1].strip()
+        return task_id
 
 
 class TaskLocalRepository(TaskRepository):

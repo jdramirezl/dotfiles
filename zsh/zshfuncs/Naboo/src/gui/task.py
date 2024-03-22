@@ -61,6 +61,9 @@ class TaskGUI(GUI):
 
         # 2. Update the artifact
         # iter through the artifacts attributes
+        print(
+            f"{PRINT.SEPARATOR} New artifact: {new_version.name} {new_version.version}"
+        )
         for attribute in new_version.__dict__:
             setattr(artifact, attribute, getattr(new_version, attribute))
 
@@ -131,9 +134,6 @@ class TaskGUI(GUI):
             else:
                 print("Invalid choice")
 
-    def update_artifact_input(self, task: TaskModel, artifact: ArtifactModel) -> None:
-        self.update_artifact(artifact)
-
     def update_runtime_inputs(self, task_input: ArtifactModel) -> None:
         value = input("Enter the new value: ")
         task_input.value = value
@@ -202,7 +202,7 @@ class TaskGUI(GUI):
                         # f"artifact_inputs/{artifact.name} {artifact.version}", printwith color!
                         f"{COLORS.GREEN}artifact_input -> {artifact.name}{COLORS.ENDC} {artifact.version}",
                         artifact.id,
-                        (self.update_artifact_input, task, artifact),
+                        (self.update_artifact, task, artifact),
                     ]
                 )
 
@@ -335,7 +335,8 @@ class TaskGUI(GUI):
 
             choice = input("Enter the number of the option: ")
 
-            utils.clear_lines(7 + len(post_dict.keys()))
+            to_clear = 7 + len(utils.tree_to_list(post_dict, []))
+            utils.clear_lines(to_clear)
 
             if choice == "1":
                 print(f"{PRINT.SEPARATOR} Running the task...")
@@ -343,10 +344,14 @@ class TaskGUI(GUI):
                 # Create a service with CLI
                 repository = TaskCLIRepository()
                 service = TaskService(repository)
-                service.create(local_task)
+                id = service.create(local_task)
+                print(f"{PRINT.SEPARATOR} The task has been created with the id: {id}")
+
+                local_task.visible_id = id
 
                 # monitor task status
                 self.check_status(self.task_service, TASK_MESSAGES, local_task)
+                break
             elif choice == "2":
                 self.update_from_old_task(local_task)
             elif choice == "3":

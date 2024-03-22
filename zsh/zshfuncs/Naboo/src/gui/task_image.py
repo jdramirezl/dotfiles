@@ -87,5 +87,6 @@ class TaskImageGUI(GUI):
             f"Preparing the task {task.name}:{task.version}",
         )
 
-        self.fda.prepare_image(task)
+        # self.fda.prepare_image(task)
+        id = service.create(task)
         self.check_status(self.task_image_service, TASK_IMAGE_MESSAGES, task)

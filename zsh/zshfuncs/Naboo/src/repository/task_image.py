@@ -20,7 +20,7 @@ class TaskImageRepository(Repository):
         pass
 
     @abstractmethod
-    def post(self, task_image: TaskImageModel) -> None:
+    def post(self, task_image: TaskImageModel) -> str:
         pass
 
 
@@ -53,10 +53,9 @@ class TaskImageAPIRepository(TaskImageRepository):
         task_images = [TaskImageModel(task_image) for task_image in response["results"]]
         return task_images
 
-    def post(self, task_image: TaskImageModel) -> None:
+    def post(self, task_image: TaskImageModel) -> str:
         url = self.URL
         payload = task_image.to_post_dict()
-        Request.post(url, payload, self.headers)
-
-
-
+        # Request.post(url, payload, self.headers)
+        body, _ = Request.post(url, payload, self.headers)
+        return body["visible_id"]

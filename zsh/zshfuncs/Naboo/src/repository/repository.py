@@ -11,6 +11,6 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def post(self, artifact):
+    def post(self, artifact) -> str:
         pass
 

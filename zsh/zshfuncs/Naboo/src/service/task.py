@@ -14,8 +14,9 @@ class TaskService:
     def get_all(self) -> List[TaskModel]:
         return self.repository.get_all()
 
-    def create(self, task: TaskModel) -> None:
-        self.repository.post(task)
+    def create(self, task: TaskModel) -> str:
+        # self.repository.post(task)
+        return self.repository.post(task)
 
     def get_by_username(self, username: str) -> List[TaskModel]:
         tasks = self.get_all()

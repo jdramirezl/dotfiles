@@ -8,8 +8,8 @@ class TaskImageService:
     def __init__(self, task_image_repository: TaskImageRepository) -> None:
         self.repository = task_image_repository
 
-    def create(self, task_image: TaskImageModel) -> None:
-        self.repository.post(task_image)
+    def create(self, task_image: TaskImageModel) -> str:
+        return self.repository.post(task_image)
 
     def get(self, task_image_id: str) -> TaskImageModel:
         return self.repository.get(task_image_id)
@@ -32,10 +32,7 @@ class TaskImageService:
     ) -> Optional[TaskImageModel]:
         task_images = self.get_all()
         for task_image in task_images:
-            if (
-                task_image.name == name
-                and task_image.version == version
-            ):
+            if task_image.name == name and task_image.version == version:
                 return task_image
         return None
 
