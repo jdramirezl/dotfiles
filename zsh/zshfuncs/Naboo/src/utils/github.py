@@ -33,21 +33,24 @@ class GitHub:
 
     def get_user_email(self):
         return self.git.config("user.email")
-    
+
     def get_user_from_commit(self, commit: str):
         try:
             return self.repo.commit(commit).author.name
         except:
             return "Unknown"
-    
+
     def get_user_email_from_commit(self, commit: str):
         try:
             return self.repo.commit(commit).author.email
         except:
             return "Unknown"
-        
+
     def get_usernames_from_email(self, email: str):
         return self.git.log("--all", "--author=" + email).split("\n")
 
     def get_commit_message(self, commit: str):
         return self.repo.commit(commit).message
+
+    def get_latest_commit_id(self):
+        return self.repo.head.commit.hexsha

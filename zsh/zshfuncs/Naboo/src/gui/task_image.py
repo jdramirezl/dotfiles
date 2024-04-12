@@ -60,6 +60,9 @@ class TaskImageGUI(GUI):
         # set the new version
         task.version = new_version
 
+        # Update the task images commit id to the latest commit id of the current branch
+        task.commit_id = self.github.get_latest_commit_id()
+
         # Show the user the task to be prepared
         print(f"{PRINT.SEPARATOR} The new task:")
         task_image_body = task.to_post_dict()
