@@ -91,6 +91,10 @@ export PATH=/Users/julianramire/Library/Python/3.11/bin:/Users/julianramire/.sdk
 export ES_JAVA_HOME=
 export JAVA_HOME=
 
+
+## Naboo test
+export PATH="$HOME/.naboo/naboo_venv/bin:$PATH"
+
 ## The following line is added by pre-commit 
 export PATH="/Users/julianramire/Library/Python/3.9/bin:$PATH" 
 export PATH=$PATH:/Users/julianramire/.spicetify
