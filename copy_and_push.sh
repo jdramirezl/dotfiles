@@ -6,7 +6,7 @@ zshfuncs="/Users/julianramire/dotfiles"
 ohmyzsh="/Users/julianramire/.oh-my-zsh"
 nvim="/Users/julianramire/.config/nvim"
 tmux="/Users/julianramire/.tmux.conf"
-repo_path="/Users/julianramire/gh_dotfiles"
+repo_path="/Users/julianramire/backup"
 commit_message="Auto commit on $(date +'%Y-%m-%d')"
 
 # Function to copy files from directories to the repository

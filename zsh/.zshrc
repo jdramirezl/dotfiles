@@ -4,6 +4,8 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+export LANG="en_US.UTF-8" # (updated)
+
 
 # Theme
 ZSH_THEME="gnzh"
@@ -28,6 +30,10 @@ else
 fi
 
 export PATH="/usr/local/mysql-8.1.0-macos13-x86_64/bin:$PATH"
+export PATH="/Users/julianramire/bin:$PATH"
+
+
+
 
 # Plugins
 plugins=(
@@ -35,20 +41,23 @@ plugins=(
 	zsh-syntax-highlighting
 	zsh-autosuggestions
 	command-not-found
-	exa-zsh
+	zsh-eza
 )
 
-ZSH_DISABLE_COMPFIX=true
 
 # OMZ config source
 source $ZSH/oh-my-zsh.sh
+
+# Start colima if not running
+if ! pgrep -f colima > /dev/null; then
+    colima stop && colima start --mount-type 9p
+fi
 
 # -------------------------------------------------------------------
 # Include
 # -------------------------------------------------------------------
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias poetry='/Users/julianramire/.local/bin/poetry'
 # Include Alias
 if [ -f $HOME/dotfiles/zshalias ]; then
     source $HOME/dotfiles/zshalias
@@ -61,46 +70,47 @@ if [ -f $HOME/dotfiles/zshfunc ]; then
     echo "Found functions"
 fi
 
-# Include fda
-if [ -f $HOME/dotfiles/zshfda ]; then
-    source $HOME/dotfiles/zshfda
-    echo "Found FDA function"
-fi
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-export PATH=/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin
-#Added by furycli:
-export PATH=/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin
-export PATH=/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/usr/local/go/bin
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH=/Users/julianramire/.local/bin:$PATH
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 export ES_JAVA_HOME=
 export JAVA_HOME=
 
 eval "$(/usr/local/bin/brew shellenv)"
-export PATH=/Users/julianramire/.sdkman/candidates/grails/current/bin:/usr/local/bin:/usr/local/sbin:/Users/julianramire/.nvm/versions/node/v14.21.2/bin:/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/usr/local/go/bin:/opt/homebrew/bin
-#Added by furycli:
-export PATH=/Users/julianramire/Library/Python/3.11/bin:/Users/julianramire/.sdkman/candidates/grails/current/bin:/usr/local/bin:/usr/local/sbin:/Users/julianramire/.nvm/versions/node/v14.21.2/bin:/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/usr/local/go/bin:/opt/homebrew/bin
-export PATH=/Users/julianramire/Library/Python/3.11/bin:/Users/julianramire/.sdkman/candidates/grails/current/bin:/usr/local/bin:/usr/local/sbin:/Users/julianramire/.nvm/versions/node/v14.21.2/bin:/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/usr/local/go/bin:/opt/homebrew/bin:/usr/local/go/bin
+export PATH=/Users/julianramire/.sdkman/candidates/grails/current/bin:/usr/local/bin:/usr/local/sbin:/Users/julianramire/.nvm/versions/node/v20.14.0/bin:/Users/julianramire/Library/Python/3.11/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin:/usr/local/go/bin:/opt/homebrew/bin
 export ES_JAVA_HOME=
 export JAVA_HOME=
 
+## The following line is added by pre-commit 
+export PATH="/Users/julianramire/Library/Python/3.9/bin:$PATH" 
 
-## Naboo test
-export PATH="$HOME/.naboo/naboo_venv/bin:$PATH"
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin" 
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/julianramire/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/julianramire/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+# Created by `pipx` on 2024-06-15 06:32:33
+export PATH="$PATH:/Users/julianramire/.local/bin"
 
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/julianramire/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/julianramire/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+export PATH=/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin
 
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH="/usr/local/sbin:$PATH"
+
+# # Added by naboo:
+# export PATH="$HOME/.naboo/naboo_venv/bin:$PATH" # Added by naboo
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
+## The following line is added by pre-commit 
+export PATH="/Users/julianramire/Library/Python/3.9/bin:$PATH" 
 export RANGER_FURY_LOCATION=/Users/julianramire/.fury #Added by Fury CLI
 export RANGER_FURY_VENV_LOCATION=/Users/julianramire/.fury/fury_venv #Added by Fury CLI
 

@@ -64,5 +64,5 @@ map("v", ">", ">gv")
 -- Clear after search
 map("n", "<leader>cs", "<cmd>nohl<cr>", "Clear highlights")
 
--- Open neogit
-map("n", "<leader>gg", "<cmd>Neogit<cr>", "Open neogit")
+-- Open Neogit
+map("n", "<leader>l", "<cmd>Neogit<cr>", "Open Neogit")

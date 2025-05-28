@@ -3,52 +3,60 @@ return {
     {
         "nvim-neotest/neotest",
         dependencies = {
+            "nvim-neotest/nvim-nio",
             "nvim-lua/plenary.nvim",
-            "nvim-treesitter/nvim-treesitter",
-            "antoinemadec/FixCursorHold.nvim",
-            "folke/neodev.nvim",
-            "nvim-neotest/neotest-python"
-        },
-        keys = {
-            {
-                "<leader>tl",
-                function()
-                    require("neotest").run.run_last()
-                end,
-                desc = "Run Last Test",
-            },
-            {
-                "<leader>tL",
-                function()
-                    require("neotest").run.run_last({ strategy = "dap" })
-                end,
-                desc = "Debug Last Test",
-            },
-            {
-                "<leader>tw",
-                "<cmd>lua require('neotest').run.run({ jestCommand = 'jest --watch ' })<cr>",
-                desc = "Run Watch",
-            },
+            "nvim-neotest/neotest-python",
+            "mrcjkb/rustaceanvim",
         },
         config = function()
-            require('neotest').setup {
+            require("neotest").setup({
                 adapters = {
-                    require("neotest-python")
+                    require("neotest-python")({
+                        args = { "-v" }, -- get more diff
+                    }),
+                    require("rustaceanvim.neotest"),
                 },
-
-            }
-        end
-        -- mappings = {
-        --     run_all = '<Leader>ta',
-        --     run_file = '<Leader>tf',
-        --     run_nearest = '<Leader>tn',
-        --     run_last = '<Leader>tl',
-        --     run_suite = '<Leader>ts',
-        --     toggle_results = '<Leader>tt',
+                output = {
+                    -- disable pop-up with failing test info (prefer virtual text)
+                    open_on_run = false,
+                },
+                quickfix = {
+                    enabled = false,
+                },
+            })
+        end,
+        keys = {
+            { "<leader>tt", "<CMD>Neotest summary toggle<CR>", desc = "Toggle Neotest" },
+            { "<leader>tn", "<CMD>Neotest run<CR>",            desc = "Test Nearest" },
+            { "<leader>ts", "<CMD>Neotest stop<CR>",           desc = "Test Stop" },
+            { "<leader>tf", "<CMD>Neotest run file<CR>",       desc = "Test File" },
+            -- create a command that shows the output of a test with "neotest.output"
+            {
+                "<leader>to",
+                "<CMD>Neotest output<CR>",
+                desc = "Toggle Neotest",
+            },
+            {
+                "<leader>td",
+                function() require("neotest").run.run({ strategy = "dap" }) end,
+                desc = "Test Debug",
+            },
+        },
+        cmd = "Neotest",
+    },
+    {
+        -- install dap
+        "mfussenegger/nvim-dap",
+        requires = {
+            "rcarriga/nvim-dap-ui",
+            "theHamsta/nvim-dap-virtual-text",
+            "mfussenegger/nvim-dap-python",
+            "nvim-telescope/telescope-dap.nvim",
+        },
     },
     {
         "lukas-reineke/indent-blankline.nvim",
-        event = "BufReadPre",
+        main = "ibl",
         config = true,
     },
     -- Comment with haste
@@ -81,7 +89,23 @@ return {
                         dismiss = "<M-'>",
                     },
                 },
-                copilot_node_command = "/Users/julianramire/.nvm/versions/node/v20.2.0/bin/node"
+                filetypes = {
+                    typescriptreact = true,
+                    python = true,
+                    rust = true,
+                    markdown = true,
+                    go = true,
+                    lua = true,
+                    typescript = true,
+                    javascript = true,
+                    html = true,
+                    css = true,
+                    scss = true,
+                    json = true,
+                    yaml = true,
+                    toml = true,
+                },
+                copilot_node_command = "/Users/julianramire/.nvm/versions/node/v20.14.0/bin/node"
             })
         end,
 
