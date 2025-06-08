@@ -7,15 +7,16 @@ This repository contains my personal dotfiles and configuration for various deve
 - 🐚 Zsh - Shell configuration and custom scripts
 - ⭐ Starship - Cross-shell prompt
 
-## 📦 What's Included
+## �� What's Included
 
-- `.config/`
-  - `nvim/` - Neovim configuration
-  - `wezterm/` - WezTerm configuration
-  - `starship.toml` - Starship prompt configuration
-- `.zsh/` - Custom Zsh scripts and functions
-- `.zshrc` - Main Zsh configuration
-- `.wezterm.lua` - WezTerm main configuration
+- `config/` - All configuration files
+  - `.config/`
+    - `nvim/` - Neovim configuration
+    - `wezterm/` - WezTerm configuration
+    - `starship.toml` - Starship prompt configuration
+  - `.zsh/` - Custom Zsh scripts and functions
+  - `.zshrc` - Main Zsh configuration
+  - `.wezterm.lua` - WezTerm main configuration
 - `backup_dotfiles.sh` - Automated backup script
 
 ## 🔧 Installation
@@ -29,18 +30,18 @@ This repository contains my personal dotfiles and configuration for various deve
 2. Create symbolic links:
    ```bash
    # Neovim
-   ln -s $(pwd)/.config/nvim ~/.config/nvim
+   ln -s $(pwd)/config/.config/nvim ~/.config/nvim
 
    # WezTerm
-   ln -s $(pwd)/.wezterm.lua ~/.wezterm.lua
-   ln -s $(pwd)/.config/wezterm ~/.config/wezterm
+   ln -s $(pwd)/config/.wezterm.lua ~/.wezterm.lua
+   ln -s $(pwd)/config/.config/wezterm ~/.config/wezterm
 
    # Zsh
-   ln -s $(pwd)/.zshrc ~/.zshrc
-   ln -s $(pwd)/.zsh ~/.zsh
+   ln -s $(pwd)/config/.zshrc ~/.zshrc
+   ln -s $(pwd)/config/.zsh ~/.zsh
 
    # Starship
-   ln -s $(pwd)/.config/starship.toml ~/.config/starship.toml
+   ln -s $(pwd)/config/.config/starship.toml ~/.config/starship.toml
    ```
 
 ## 🔄 Backup
@@ -58,7 +59,7 @@ To backup your current configuration:
    ```
 
 The script will:
-- Copy all configuration files from their respective locations
+- Copy all configuration files from their respective locations into the `config/` directory
 - Commit the changes with a timestamp
 - Push to the repository
 

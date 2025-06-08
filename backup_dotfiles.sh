@@ -17,8 +17,8 @@ print_error() {
 # Create backup directories
 create_dirs() {
     print_status "Creating backup directories..."
-    mkdir -p .config/{nvim,wezterm}
-    mkdir -p .zsh
+    mkdir -p config/.config/{nvim,wezterm}
+    mkdir -p config/.zsh
 }
 
 # Copy dotfiles
@@ -27,7 +27,7 @@ copy_files() {
     
     # Neovim
     if [ -d "$HOME/.config/nvim" ]; then
-        cp -R "$HOME/.config/nvim" ".config/"
+        cp -R "$HOME/.config/nvim" "config/.config/"
         print_status "Copied Neovim configuration"
     else
         print_error "Neovim config not found"
@@ -35,27 +35,27 @@ copy_files() {
 
     # WezTerm
     if [ -f "$HOME/.wezterm.lua" ]; then
-        cp "$HOME/.wezterm.lua" "."
+        cp "$HOME/.wezterm.lua" "config/"
         print_status "Copied WezTerm configuration"
     fi
     if [ -d "$HOME/.config/wezterm" ]; then
-        cp -R "$HOME/.config/wezterm" ".config/"
+        cp -R "$HOME/.config/wezterm" "config/.config/"
         print_status "Copied WezTerm directory"
     fi
 
     # Zsh files
     if [ -f "$HOME/.zshrc" ]; then
-        cp "$HOME/.zshrc" "."
+        cp "$HOME/.zshrc" "config/"
         print_status "Copied .zshrc"
     fi
     if [ -d "$HOME/.zsh" ]; then
-        cp -R "$HOME/.zsh/"* ".zsh/"
+        cp -R "$HOME/.zsh/"* "config/.zsh/"
         print_status "Copied .zsh directory"
     fi
 
     # Starship
     if [ -f "$HOME/.config/starship.toml" ]; then
-        cp "$HOME/.config/starship.toml" ".config/"
+        cp "$HOME/.config/starship.toml" "config/.config/"
         print_status "Copied Starship configuration"
     fi
 }
