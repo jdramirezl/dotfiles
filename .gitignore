@@ -1,0 +1,86 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+tags
+.vim/plugged/
+.vim/autoload/plug.vim
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Zsh
+*.zwc
+*.zwc.old
+.zcompdump*
+.zsh_history
+.zsh_sessions/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.python-version
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.node_repl_history
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Personal
+.personal_tokens
+.secrets 
