@@ -1,0 +1,18 @@
+# Themer
+[colors]
+foreground = "#c1c6ca"
+background = "#131518"
+#cursor_bg = "#bbbbbb"
+cursor_bg = "#8f5ac9"
+#cursor_fg = "#8f5ac9"
+cursor_fg = "#ffff00"
+#cursor_fg = "#8f5ac9"
+##cursor_bg = "#131518"
+#cursor_border = "#bbbbbb"
+cursor_border = "#8f5ac9"
+selection_bg = "#87afdf"
+selection_fg = "#131518"
+
+ansi = ["#131518","#df8787","#afdf87","#ffffaf","#87afdf","#dfafdf","#afdfdf","#c1c6ca"]
+#brights = ["#131518","#df8787","#afdf87","#ffffaf","#87afdf","#dfafdf","#afdfdf","#c1c6ca"]
+brights = ["#303236","#df999a","#b8e09a","#f8f9ba","#98b9e1","#dfb9e1","#b8e0e1","#dee3e8"]

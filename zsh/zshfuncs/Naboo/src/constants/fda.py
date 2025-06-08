@@ -1,1 +1,0 @@
-FDA_FILE = ".fury"
