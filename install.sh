@@ -48,7 +48,7 @@ copy_item() {
     if [ ! -e "$source" ]; then
         print_error "Source does not exist: $source"
         return 1
-    }
+    fi
     
     # Create parent directory if needed
     create_parent_dir "$target"
@@ -84,21 +84,29 @@ install_dotfiles() {
     
     print_status "Installing dotfiles from $REPO_PATH"
     
-    # Array of files to copy (source:target)
-    declare -A files=(
-        ["$CONFIG_PATH/.config/nvim"]="$HOME/.config/nvim"
-        ["$CONFIG_PATH/.config/wezterm"]="$HOME/.config/wezterm"
-        ["$CONFIG_PATH/.config/starship.toml"]="$HOME/.config/starship.toml"
-        ["$CONFIG_PATH/.wezterm.lua"]="$HOME/.wezterm.lua"
-        ["$CONFIG_PATH/.zshrc"]="$HOME/.zshrc"
-        ["$CONFIG_PATH/.zsh"]="$HOME/.zsh"
+    # Define source and target paths
+    local sources=(
+        "$CONFIG_PATH/.config/nvim"
+        "$CONFIG_PATH/.config/wezterm"
+        "$CONFIG_PATH/.config/starship.toml"
+        "$CONFIG_PATH/.wezterm.lua"
+        "$CONFIG_PATH/.zshrc"
+        "$CONFIG_PATH/.zsh"
+    )
+    
+    local targets=(
+        "$HOME/.config/nvim"
+        "$HOME/.config/wezterm"
+        "$HOME/.config/starship.toml"
+        "$HOME/.wezterm.lua"
+        "$HOME/.zshrc"
+        "$HOME/.zsh"
     )
     
     # Copy files and directories
     local error_count=0
-    for source in "${!files[@]}"; do
-        target="${files[$source]}"
-        if ! copy_item "$source" "$target"; then
+    for i in "${!sources[@]}"; do
+        if ! copy_item "${sources[$i]}" "${targets[$i]}"; then
             ((error_count++))
         fi
     done
