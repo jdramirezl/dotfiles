@@ -1,15 +1,17 @@
 local wezterm = require("wezterm")
 
--- Import configuration modules
-local setup_appearance = require("appearance")
-local setup_keybindings = require("keys")
-local setup_status_bar = require("status")
+package.path = wezterm.config_dir .. "/?.lua;" .. package.path
 
-local config = {}
+local config = wezterm.config_builder()
 
--- Apply configurations from modules
-setup_appearance(config)
-setup_keybindings(config)
-setup_status_bar(config)
+require("appearance")(config)
+require("keys")(config)
+require("status")(config)
+
+local local_config = wezterm.config_dir .. "/local.lua"
+local ok, local_setup = pcall(dofile, local_config)
+if ok and type(local_setup) == "function" then
+  local_setup(config)
+end
 
 return config

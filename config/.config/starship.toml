@@ -1,130 +1,83 @@
-#format = """
-#[╭─user───❯](bold blue) $username
-#[┣─system─❯](bold yellow) $hostname
-#[┣─project❯](bold red) $directory$rust$git_branch$git_status$package$golang$terraform$docker_context$python$docker_context$nodejs
-#[╰─cmd────❯](bold green) 
-#"""
-#format = '$all'
+palette = "catppuccin_mocha"
+command_timeout = 1000
 
-[localip]
-ssh_only = false
-format = '📟 [$localipv4](bold red) '
-disabled = false
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+surface1 = "#45475a"
+base = "#1e1e2e"
 
-[username]
-style_user = "green bold"
-style_root = "red bold"
-format = "[$user]($style) "
-disabled = false
-show_always = true
-
-[hostname]
-ssh_only = false
-format = 'on [$hostname](bold yellow) '
-trim_at = "."
-disabled = false
-
-# Replace the "❯" symbol in the prompt with "➜"
-[character]                            
-success_symbol = "[➜](bold green)"    
+[character]
+success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
 
-# configure directory
 [directory]
-read_only = "󰌾"
-truncation_length = 10
-truncate_to_repo = true # truncates directory to root folder if in github repo
-style = "bold italic blue"
+read_only = " 󰌾"
+truncation_length = 6
+truncate_to_repo = true
+style = "bold blue"
 
 [cmd_duration]
-min_time = 4
-show_milliseconds = false
-disabled = false
-style = "bold italic red"
+min_time = 1500
+format = "took [$duration](bold peach) "
 
-[aws]
-symbol = "󰸏 "
+[username]
+show_always = false
+format = "[$user](bold green) "
 
-[conda]
-symbol = "󰌠 "
+[hostname]
+ssh_only = true
+format = "on [$hostname](bold yellow) "
+trim_at = "."
 
-[dart]
-symbol = "󰨚 "
-
-[docker_context]
-symbol = "󰡨 "
-format = "via [$symbol$context]($style) "
-style = "blue bold"
-only_with_files = true
-detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
-detect_folders = []
-disabled = false
-
-[elixir]
-symbol = "󰪞 "
-
-[elm]
-symbol = "󰟘 "
+[localip]
+disabled = true
 
 [git_branch]
 symbol = "󰊢 "
+style = "bold mauve"
 
-[golang]
-symbol = "󰟓 "
-
-[hg_branch]
-symbol = "󰕚 "
-
-[java]
-symbol = "󰬷 "
-
-[julia]
-symbol = "󱥨 "
-
-[memory_usage]
-symbol = "󰍛 "
-
-[nim]
-symbol = "󰆥 "
-
-[nix_shell]
-symbol = "󱄅 "
-
-[package]
-symbol = "󰏗 "
-
-[perl]
-symbol = "󰨎 "
-
-[php]
-symbol = "󰌟 "
+[git_status]
+style = "bold red"
 
 [python]
 symbol = "󰌠 "
-#pyenv_version_name = true
-format = 'via [${symbol}python (${version} )(\($virtualenv\) )]($style)'
+format = "via [$symbol${pyenv_prefix}(${version})( \\($virtualenv\\))]($style) "
 style = "bold yellow"
-pyenv_prefix = "venv "
-python_binary = ["./venv/bin/python", "python", "python3", "python2"]
+python_binary = ["./.venv/bin/python", "./venv/bin/python", "python3", "python"]
 detect_extensions = ["py"]
 version_format = "v${raw}"
 
-[ruby]
-symbol = "󰴭 "
+[nodejs]
+symbol = "󰎙 "
+format = "via [$symbol$version](bold green) "
+detect_files = ["package.json", ".node-version"]
 
 [rust]
 symbol = "󱘗 "
 
-[scala]
-symbol = "󰘜 "
+[golang]
+symbol = "󰟓 "
 
-[shlvl]
-symbol = "󰨊 "
+[java]
+symbol = "󰬷 "
 
-[swift]
-symbol = "󰛥 "
-
-[nodejs]
-format = "via [󰎙 Node.js $version](bold green) "
-detect_files = ["package.json", ".node-version"]
-detect_folders = ["node_modules"]
+[docker_context]
+symbol = "󰡨 "
+format = "via [$symbol$context]($style) "
+only_with_files = true
+detect_files = ["compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml", "Dockerfile"]

@@ -1,0 +1,52 @@
+local map = vim.keymap.set
+local buffers = require("util.buffers")
+
+map({ "n", "x" }, "<Space>", "<Nop>", { silent = true })
+map("i", "jj", "<Esc>", { desc = "Exit insert mode" })
+map("t", "jj", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+map("n", "<leader>w", "<cmd>write<cr>", { desc = "Write file" })
+map("n", "<leader>wa", "<cmd>wall<cr>", { desc = "Write all files" })
+map("n", "<leader>wc", "<cmd>close<cr>", { desc = "Close window" })
+map("n", "<leader>qq", "<cmd>quit<cr>", { desc = "Quit window" })
+map("n", "<leader>qa", buffers.quit_all, { desc = "Quit all safely" })
+
+map("n", "<C-h>", "<C-w>h", { desc = "Focus left window" })
+map("n", "<C-j>", "<C-w>j", { desc = "Focus lower window" })
+map("n", "<C-k>", "<C-w>k", { desc = "Focus upper window" })
+map("n", "<C-l>", "<C-w>l", { desc = "Focus right window" })
+
+map("n", "<A-j>", "<cmd>move .+1<cr>==", { desc = "Move line down" })
+map("n", "<A-k>", "<cmd>move .-2<cr>==", { desc = "Move line up" })
+map("i", "<A-j>", "<Esc><cmd>move .+1<cr>==gi", { desc = "Move line down" })
+map("i", "<A-k>", "<Esc><cmd>move .-2<cr>==gi", { desc = "Move line up" })
+map("x", "<A-j>", ":move '>+1<cr>gv=gv", { desc = "Move selection down" })
+map("x", "<A-k>", ":move '<-2<cr>gv=gv", { desc = "Move selection up" })
+map("x", "<", "<gv", { desc = "Indent left" })
+map("x", ">", ">gv", { desc = "Indent right" })
+
+map("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+map("n", "]b", "<cmd>bnext<cr>", { desc = "Next buffer" })
+map("n", "<leader>bd", buffers.delete_current, { desc = "Delete buffer safely" })
+map("n", "<leader>bo", buffers.delete_others, { desc = "Delete other buffers safely" })
+map("n", "<leader>bD", buffers.delete_all, { desc = "Delete all buffers safely" })
+
+map("x", "<leader>y", '"+y', { desc = "Yank to system clipboard" })
+map("n", "<leader>ya", "<cmd>%y+<cr>", { desc = "Yank entire file" })
+map("n", "<leader>yj", "yyp", { desc = "Duplicate line down" })
+map("n", "<leader>yk", "yyP", { desc = "Duplicate line up" })
+
+map("n", "<Esc>", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
+map("n", "<leader>zt", "za", { desc = "Toggle fold" })
+map("n", "<leader>zM", "zM", { desc = "Close all folds" })
+map("n", "<leader>zR", "zR", { desc = "Open all folds" })
+
+require("config.diagnostics")
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
+map("n", "<leader>dd", vim.diagnostic.open_float, { desc = "Diagnostic details" })
+map("n", "<leader>dl", vim.diagnostic.setloclist, { desc = "Diagnostics to location list" })
+map("n", "<leader>ud", function()
+  local config = vim.diagnostic.config()
+  vim.diagnostic.config({ virtual_text = not config.virtual_text })
+end, { desc = "Toggle inline diagnostics" })
