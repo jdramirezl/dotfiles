@@ -1,0 +1,283 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck source=../lib/manifest.sh
+source "$REPO_ROOT/lib/manifest.sh"
+
+info() { printf '[dotfiles] %s\n' "$*"; }
+warn() { printf '[dotfiles] WARNING: %s\n' "$*" >&2; }
+die() { printf '[dotfiles] ERROR: %s\n' "$*" >&2; exit 1; }
+
+usage() {
+  cat <<'EOF'
+Usage: bin/dotfiles <command> [options]
+
+Commands:
+  check                 Validate platform, manifest, and privacy rules
+  status                Show installation and dependency state
+  plan install|sync     Print a mutation-free execution plan
+  install [--apply]     Link repository configuration into $HOME
+  sync [--apply]        Import allowlisted legacy regular targets
+  backup [--output DIR] Snapshot allowlisted targets outside Git
+  uninstall [--apply]   Remove links owned by this repository
+  deps check|install    Check or install Brewfile dependencies
+  update [--apply]      Update dependencies and editor-managed tools
+  verify                Run shell, terminal, prompt, and editor checks
+
+Mutation commands are dry-run by default. Pass --apply explicitly.
+EOF
+}
+
+require_platform() {
+  [[ "$(uname -s)" == "Darwin" ]] || die "supported platform is macOS"
+  case "$(uname -m)" in arm64|x86_64) ;; *) die "unsupported architecture: $(uname -m)" ;; esac
+}
+
+is_owned_link() {
+  local source="$1" target="$2"
+  [[ -L "$target" && "$(readlink "$target")" == "$source" ]]
+}
+
+check_manifest() {
+  local rel target source seen_targets=""
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    [[ -e "$source" ]] || die "manifest source missing: $rel"
+    [[ "$source" == "$REPO_ROOT/config/"* ]] || die "source escapes config root: $rel"
+    [[ "$target" == "$HOME/"* ]] || die "target escapes home: $target"
+    [[ "$seen_targets" != *$'\n'"$target"$'\n'* ]] || die "duplicate manifest target: $target"
+    seen_targets+=$'\n'"$target"$'\n'
+  done < <(manifest_entries)
+}
+
+cmd_check() {
+  require_platform
+  check_manifest
+  "$REPO_ROOT/scripts/secret-check"
+  info "platform and manifest checks passed"
+}
+
+state_for() {
+  local source="$1" target="$2"
+  if is_owned_link "$source" "$target"; then printf 'linked'
+  elif [[ -L "$target" ]]; then printf 'foreign-link'
+  elif [[ -e "$target" ]]; then printf 'regular'
+  else printf 'missing'
+  fi
+}
+
+cmd_status() {
+  local rel target source state failures=0
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    state="$(state_for "$source" "$target")"
+    printf '%-38s %s\n' "$rel" "$state"
+    [[ "$state" == linked ]] || failures=1
+  done < <(manifest_entries)
+  if command -v brew >/dev/null 2>&1; then
+    if ! brew bundle check --file "$REPO_ROOT/Brewfile" >/dev/null 2>&1; then
+      warn "Brewfile dependencies are missing or outdated; run: bin/dotfiles deps check"
+      failures=1
+    fi
+  else
+    warn "Homebrew is not installed"
+    failures=1
+  fi
+  return "$failures"
+}
+
+plan_install() {
+  local rel target source state
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    state="$(state_for "$source" "$target")"
+    case "$state" in
+      linked) printf 'UNCHANGED %s\n' "$target" ;;
+      missing) printf 'LINK      %s -> %s\n' "$target" "$source" ;;
+      *) printf 'BACKUP    %s\nLINK      %s -> %s\n' "$target" "$target" "$source" ;;
+    esac
+  done < <(manifest_entries)
+}
+
+plan_sync() {
+  local rel target source state
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    state="$(state_for "$source" "$target")"
+    case "$state" in
+      linked) printf 'UNCHANGED %s (already repository-backed)\n' "$target" ;;
+      regular) printf 'IMPORT    %s -> %s\n' "$target" "$source" ;;
+      missing) printf 'SKIP      %s (missing)\n' "$target" ;;
+      foreign-link) printf 'BLOCKED   %s (foreign link)\n' "$target" ;;
+    esac
+  done < <(manifest_entries)
+}
+
+cmd_plan() {
+  case "${1:-}" in
+    install) cmd_check >/dev/null; plan_install ;;
+    sync) cmd_check >/dev/null; plan_sync ;;
+    *) die "plan requires install or sync" ;;
+  esac
+}
+
+rollback_install() {
+  local transaction="$1" target backup
+  [[ -f "$transaction" ]] || return
+  warn "install failed; restoring previous targets"
+  while IFS=$'\t' read -r target backup; do
+    [[ -L "$target" ]] && rm "$target"
+    if [[ -n "$backup" && -e "$backup" ]]; then
+      mkdir -p "$(dirname "$target")"
+      mv "$backup" "$target"
+    fi
+  done < "$transaction"
+}
+
+cmd_install() {
+  local apply=false
+  [[ "${1:-}" == "--apply" ]] && apply=true
+  cmd_check
+  plan_install
+  [[ "$apply" == true ]] || { info "dry run only; rerun with --apply"; return; }
+
+  local rel target source state needs_change=false
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    [[ "$(state_for "$source" "$target")" == linked ]] || needs_change=true
+  done < <(manifest_entries)
+  if [[ "$needs_change" == false ]]; then
+    info "installation already current"
+    return
+  fi
+
+  local run_id backup_root transaction backup index=0
+  run_id="$(date +%Y%m%d-%H%M%S)"
+  backup_root="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/backups/$run_id"
+  mkdir -p "$backup_root"
+  chmod 700 "$backup_root"
+  transaction="$backup_root/transaction.tsv"
+  : > "$transaction"
+  trap 'rollback_install "$transaction"' ERR INT TERM
+
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    state="$(state_for "$source" "$target")"
+    [[ "$state" == linked ]] && continue
+    index=$((index + 1))
+    backup=""
+    if [[ -e "$target" || -L "$target" ]]; then
+      backup="$backup_root/$index-$(basename "$target")"
+      mv "$target" "$backup"
+    fi
+    printf '%s\t%s\n' "$target" "$backup" >> "$transaction"
+    mkdir -p "$(dirname "$target")"
+    ln -s "$source" "$target"
+  done < <(manifest_entries)
+
+  trap - ERR INT TERM
+  info "installation complete; backup ID: $run_id"
+}
+
+cmd_sync() {
+  local apply=false
+  [[ "${1:-}" == "--apply" ]] && apply=true
+  cmd_check
+  plan_sync
+  [[ "$apply" == true ]] || { info "dry run only; rerun with --apply"; return; }
+
+  local rel target source state
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    state="$(state_for "$source" "$target")"
+    [[ "$state" == regular ]] || continue
+    "$REPO_ROOT/scripts/secret-check" "$target"
+    if [[ -d "$target" ]]; then
+      rsync -a --delete --exclude='.DS_Store' --exclude='.git' "$target"/ "$source"/
+    else
+      cp -p "$target" "$source"
+    fi
+  done < <(manifest_entries)
+  info "allowlisted import complete; review git diff before committing"
+}
+
+cmd_backup() {
+  local output=""
+  if [[ "${1:-}" == "--output" ]]; then output="${2:-}"; fi
+  [[ -n "$output" ]] || output="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/snapshots/$(date +%Y%m%d-%H%M%S)"
+  mkdir -p "$output"
+  chmod 700 "$output"
+  local rel target destination
+  while IFS=$'\t' read -r rel target; do
+    [[ -e "$target" || -L "$target" ]] || continue
+    destination="$output/$rel"
+    mkdir -p "$(dirname "$destination")"
+    rsync -aL --exclude='.DS_Store' --exclude='.git' "$target" "$destination"
+  done < <(manifest_entries)
+  info "snapshot written to $output"
+}
+
+cmd_uninstall() {
+  local apply=false rel target source
+  [[ "${1:-}" == "--apply" ]] && apply=true
+  while IFS=$'\t' read -r rel target; do
+    source="$REPO_ROOT/$rel"
+    if is_owned_link "$source" "$target"; then
+      printf 'UNLINK    %s\n' "$target"
+      [[ "$apply" == true ]] && rm "$target"
+    fi
+  done < <(manifest_entries)
+  [[ "$apply" == true ]] || info "dry run only; rerun with --apply"
+}
+
+cmd_deps() {
+  command -v brew >/dev/null 2>&1 || die "Homebrew is required; install it from https://brew.sh and retry"
+  case "${1:-check}" in
+    check) brew bundle check --file "$REPO_ROOT/Brewfile" ;;
+    install) brew bundle --file "$REPO_ROOT/Brewfile" ;;
+    *) die "deps requires check or install" ;;
+  esac
+}
+
+cmd_update() {
+  local apply=false
+  [[ "${1:-}" == "--apply" ]] && apply=true
+  printf 'UPDATE Homebrew dependencies from Brewfile\n'
+  printf 'UPDATE mise-managed runtimes\n'
+  printf 'UPDATE Neovim plugins, Mason tools, and Treesitter parsers\n'
+  [[ "$apply" == true ]] || { info "dry run only; rerun with --apply"; return; }
+  cmd_deps install
+  command -v mise >/dev/null 2>&1 && mise install
+  nvim --headless "+Lazy! sync" "+lua require('lazy').load({plugins={'mason-tool-installer.nvim','nvim-treesitter'}})" "+MasonToolsUpdateSync" "+TSUpdate" +qa
+  cmd_verify
+}
+
+cmd_verify() {
+  "$REPO_ROOT/scripts/secret-check"
+  zsh -n "$REPO_ROOT/config/.zshrc"
+  local shell_file
+  for shell_file in "$REPO_ROOT"/config/.zsh/*.zsh; do zsh -n "$shell_file"; done
+  STARSHIP_CONFIG="$REPO_ROOT/config/.config/starship.toml" starship print-config >/dev/null
+  wezterm --config-file "$REPO_ROOT/config/.wezterm.lua" show-keys --lua >/dev/null
+  XDG_CONFIG_HOME="$REPO_ROOT/config/.config" nvim --headless "+lua assert(vim.g.colors_name == 'catppuccin-mocha')" +qa
+  info "all deterministic checks passed"
+}
+
+command="${1:-help}"
+shift || true
+case "$command" in
+  check) cmd_check "$@" ;;
+  status) cmd_status "$@" ;;
+  plan) cmd_plan "$@" ;;
+  install) cmd_install "$@" ;;
+  sync) cmd_sync "$@" ;;
+  backup) cmd_backup "$@" ;;
+  uninstall) cmd_uninstall "$@" ;;
+  deps) cmd_deps "$@" ;;
+  update) cmd_update "$@" ;;
+  verify) cmd_verify "$@" ;;
+  help|-h|--help) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

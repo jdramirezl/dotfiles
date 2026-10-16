@@ -1,131 +1,34 @@
 local wezterm = require("wezterm")
+local action = wezterm.action
 
-local function setup_keybindings(config)
-    config.keys = {
-        -- Tab management
-        {
-            key = 'LeftArrow',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTabRelative(-1),  -- Previous tab
-        },
-        {
-            key = 'RightArrow',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTabRelative(1),   -- Next tab
-        },
-        {
-            key = 't',
-            mods = 'CMD',
-            action = wezterm.action.SpawnTab 'CurrentPaneDomain',  -- New tab
-        },
-        -- Direct tab switching (CMD + number)
-        {
-            key = '1',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTab(0),
-        },
-        {
-            key = '2',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTab(1),
-        },
-        {
-            key = '3',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTab(2),
-        },
-        {
-            key = '4',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTab(3),
-        },
-        {
-            key = '5',
-            mods = 'CMD',
-            action = wezterm.action.ActivateTab(4),
-        },
-        -- Split panes
-        {
-            key = 'd',
-            mods = 'CMD',
-            action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' },
-        },
-        {
-            key = 'D',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' },
-        },
-        -- Close current pane
-        {
-            key = 'w',
-            mods = 'CMD',
-            action = wezterm.action.CloseCurrentPane { confirm = false },
-        },
-        -- Navigate between panes
-        {
-            key = 'h',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.ActivatePaneDirection 'Left',
-        },
-        {
-            key = 'l',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.ActivatePaneDirection 'Right',
-        },
-        {
-            key = 'k',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.ActivatePaneDirection 'Up',
-        },
-        {
-            key = 'j',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.ActivatePaneDirection 'Down',
-        },
-        -- VI mode activation (CTRL+[)
-        {
-            key = '[',
-            mods = 'CTRL',
-            action = wezterm.action.ActivateCopyMode,
-        },
-        -- Quick select mode
-        {
-            key = 'f',
-            mods = 'CTRL|SHIFT',
-            action = wezterm.action.QuickSelect,
-        },
-        -- Adjust pane size
-        {
-            key = 'LeftArrow',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.AdjustPaneSize { 'Left', 5 },
-        },
-        {
-            key = 'RightArrow',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.AdjustPaneSize { 'Right', 5 },
-        },
-        {
-            key = 'UpArrow',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.AdjustPaneSize { 'Up', 5 },
-        },
-        {
-            key = 'DownArrow',
-            mods = 'CMD|SHIFT',
-            action = wezterm.action.AdjustPaneSize { 'Down', 5 },
-        },
-    }
+return function(config)
+  local primary = wezterm.target_triple:find("darwin") and "CMD" or "CTRL|SHIFT"
 
-    -- Mouse bindings
-    config.mouse_bindings = {
-        -- Right click copies the selection and pastes
-        {
-            event = { Down = { streak = 1, button = "Right" } },
-            mods = "NONE",
-            action = wezterm.action.CopyMode "ClearSelectionMode",
-        },
-    }
+  config.keys = {
+    { key = "LeftArrow", mods = primary, action = action.ActivateTabRelative(-1) },
+    { key = "RightArrow", mods = primary, action = action.ActivateTabRelative(1) },
+    { key = "t", mods = primary, action = action.SpawnTab("CurrentPaneDomain") },
+    { key = "d", mods = primary, action = action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+    { key = "D", mods = primary .. "|SHIFT", action = action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+    { key = "w", mods = primary, action = action.CloseCurrentPane({ confirm = true }) },
+    { key = "LeftArrow", mods = "SHIFT|" .. primary, action = action.ActivatePaneDirection("Left") },
+    { key = "RightArrow", mods = "SHIFT|" .. primary, action = action.ActivatePaneDirection("Right") },
+    { key = "UpArrow", mods = "SHIFT|" .. primary, action = action.ActivatePaneDirection("Up") },
+    { key = "DownArrow", mods = "SHIFT|" .. primary, action = action.ActivatePaneDirection("Down") },
+    { key = "LeftArrow", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Left", 5 }) },
+    { key = "RightArrow", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Right", 5 }) },
+    { key = "UpArrow", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Up", 5 }) },
+    { key = "DownArrow", mods = "CTRL|SHIFT", action = action.AdjustPaneSize({ "Down", 5 }) },
+    { key = "x", mods = primary .. "|SHIFT", action = action.ActivateCopyMode },
+    { key = "f", mods = "CTRL|SHIFT", action = action.QuickSelect },
+    { key = "p", mods = primary .. "|SHIFT", action = action.ActivateCommandPalette },
+  }
+
+  for index = 1, 8 do
+    table.insert(config.keys, {
+      key = tostring(index),
+      mods = primary,
+      action = action.ActivateTab(index - 1),
+    })
+  end
 end
-
-return setup_keybindings 
