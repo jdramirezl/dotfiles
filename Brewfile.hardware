@@ -1,0 +1,2 @@
+# DisplayLink installs a system extension and may require approval or restart.
+cask "displaylink"

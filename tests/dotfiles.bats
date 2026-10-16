@@ -90,3 +90,27 @@ run_cli() {
   after="$(shasum "$BATS_TEST_DIRNAME/../config/.zshrc" | cut -d' ' -f1)"
   [ "$before" = "$after" ]
 }
+
+@test "dependency profiles exclude hardware unless explicitly selected" {
+  fake_bin="$BATS_TEST_TMPDIR/bin"
+  log="$BATS_TEST_TMPDIR/brew.log"
+  mkdir -p "$fake_bin"
+  cat > "$fake_bin/brew" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$BREW_TEST_LOG"
+exit 0
+EOF
+  chmod +x "$fake_bin/brew"
+
+  run env HOME="$TEST_HOME" PATH="$fake_bin:/usr/bin:/bin" BREW_TEST_LOG="$log" "$CLI" deps check --profile all
+  [ "$status" -eq 0 ]
+  grep -q 'Brewfile.desktop' "$log"
+  ! grep -q 'Brewfile.hardware' "$log"
+
+  run env HOME="$TEST_HOME" PATH="$fake_bin:/usr/bin:/bin" BREW_TEST_LOG="$log" "$CLI" deps install --profile hardware
+  [ "$status" -ne 0 ]
+
+  run env HOME="$TEST_HOME" PATH="$fake_bin:/usr/bin:/bin" BREW_TEST_LOG="$log" "$CLI" deps install --profile hardware --confirm-hardware
+  [ "$status" -eq 0 ]
+  grep -q 'Brewfile.hardware' "$log"
+}

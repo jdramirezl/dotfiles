@@ -22,8 +22,9 @@ Commands:
   sync [--apply]        Import allowlisted legacy regular targets
   backup [--output DIR] Snapshot allowlisted targets outside Git
   uninstall [--apply]   Remove links owned by this repository
-  deps check|install    Check or install Brewfile dependencies
-  update [--apply]      Update dependencies and editor-managed tools
+  deps check|install [--profile NAME]
+                        Manage core, desktop, hardware, all, or local Brewfiles
+  update [--apply]      Update core dependencies and editor-managed tools
   verify                Run shell, terminal, prompt, and editor checks
 
 Mutation commands are dry-run by default. Pass --apply explicitly.
@@ -234,9 +235,40 @@ cmd_uninstall() {
 
 cmd_deps() {
   command -v brew >/dev/null 2>&1 || die "Homebrew is required; install it from https://brew.sh and retry"
-  case "${1:-check}" in
-    check) brew bundle check --file "$REPO_ROOT/Brewfile" ;;
-    install) brew bundle --file "$REPO_ROOT/Brewfile" ;;
+  local action="${1:-check}" profile="core" confirm_hardware=false file
+  [[ $# -gt 0 ]] && shift
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --profile) profile="${2:-}"; shift 2 ;;
+      --confirm-hardware) confirm_hardware=true; shift ;;
+      *) die "unknown deps option: $1" ;;
+    esac
+  done
+
+  local brewfiles=("$REPO_ROOT/Brewfile")
+  case "$profile" in
+    core) ;;
+    desktop) brewfiles=("$REPO_ROOT/Brewfile.desktop") ;;
+    hardware) brewfiles=("$REPO_ROOT/Brewfile.hardware") ;;
+    all) brewfiles+=("$REPO_ROOT/Brewfile.desktop") ;;
+    local)
+      [[ -f "$REPO_ROOT/Brewfile.local" ]] || die "Brewfile.local does not exist"
+      brewfiles=("$REPO_ROOT/Brewfile.local")
+      ;;
+    *) die "profile must be core, desktop, hardware, all, or local" ;;
+  esac
+
+  if [[ "$profile" == hardware && "$action" == install && "$confirm_hardware" != true ]]; then
+    die "hardware installation may add system extensions; rerun with --confirm-hardware after reviewing the casks"
+  fi
+
+  case "$action" in
+    check)
+      for file in "${brewfiles[@]}"; do brew bundle check --file "$file"; done
+      ;;
+    install)
+      for file in "${brewfiles[@]}"; do brew bundle --file "$file"; done
+      ;;
     *) die "deps requires check or install" ;;
   esac
 }

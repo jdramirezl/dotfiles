@@ -33,6 +33,16 @@ Catppuccin Mocha provides a consistent terminal, prompt, and editor palette. Mac
 ## Operations
 
 ```bash
+./bin/dotfiles deps check --profile core       # terminal/editor baseline
+./bin/dotfiles deps check --profile desktop    # personal desktop apps
+./bin/dotfiles deps check --profile hardware   # DisplayLink only
+./bin/dotfiles deps install --profile all       # core + desktop
+./bin/dotfiles deps install --profile hardware --confirm-hardware
+```
+
+The desktop profile includes Rectangle, Superwhisper, VS Code, Firefox, Chrome, Obsidian, Spotify, Slack, Discord, VLC, Zoom, and Anki. Android Studio, Bruno, JetBrains Toolbox, and all employer-managed applications are intentionally excluded. Superwhisper replaces the internal Wisp application with local/offline voice dictation and prompt-formatting modes.
+
+```bash
 ./bin/dotfiles status
 ./bin/dotfiles plan install
 ./bin/dotfiles backup

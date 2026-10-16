@@ -26,7 +26,18 @@ Apply deliberately:
 ./bin/dotfiles update --apply
 ```
 
-This reconciles Brewfile dependencies, mise runtimes, lazy.nvim plugins, Mason tools, and Treesitter parsers, then runs verification. Review `git status` and `git diff` afterward because plugin updates may change `lazy-lock.json`.
+This reconciles core Brewfile dependencies, mise runtimes, lazy.nvim plugins, Mason tools, and Treesitter parsers, then runs verification. Desktop and hardware applications remain explicit profile operations so an editor update cannot unexpectedly install applications or drivers. Review `git status` and `git diff` afterward because plugin updates may change `lazy-lock.json`.
+
+## Dependency profiles
+
+```bash
+./bin/dotfiles deps check --profile core
+./bin/dotfiles deps check --profile desktop
+./bin/dotfiles deps install --profile all
+./bin/dotfiles deps install --profile hardware --confirm-hardware
+```
+
+The `all` profile combines core and desktop but deliberately excludes hardware. `Brewfile.local` is ignored and can be selected with `--profile local`.
 
 ## Git review
 

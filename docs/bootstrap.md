@@ -7,14 +7,22 @@
 - Git and network access for the initial clone
 - Homebrew installed from its official instructions at <https://brew.sh>
 
-Review dependencies before installing them:
+Review dependency profiles before installing them:
 
 ```bash
-./bin/dotfiles deps check
-brew bundle --file ./Brewfile --no-upgrade
+./bin/dotfiles deps check --profile core
+./bin/dotfiles deps check --profile desktop
+./bin/dotfiles deps check --profile hardware
+./bin/dotfiles deps install --profile all
 ```
 
-The Brewfile installs Neovim 0.11+, WezTerm, Starship, mise, shell utilities, validation tools, and FiraCode Nerd Font. Project runtimes remain project-owned. Neovim Mason installs Pyright, rust-analyzer, Debugpy, Prettier, Ruff, and Stylua on first use.
+`all` installs core and desktop dependencies. Hardware remains separate because DisplayLink installs a system extension and may require macOS approval, logout, or restart:
+
+```bash
+./bin/dotfiles deps install --profile hardware --confirm-hardware
+```
+
+The core Brewfile installs Neovim 0.11+, WezTerm, Starship, mise, shell utilities, validation tools, and FiraCode Nerd Font. The desktop profile installs Rectangle, Superwhisper, VS Code, browsers, communication tools, media tools, Obsidian, and Anki. Superwhisper is the portable replacement for the internal Wisp app and can keep transcription and prompt cleanup local on Apple Silicon. Project runtimes remain project-owned. Neovim Mason installs Pyright, rust-analyzer, Debugpy, Prettier, Ruff, and Stylua on first use.
 
 ## Install
 

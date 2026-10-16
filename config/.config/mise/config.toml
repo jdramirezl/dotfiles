@@ -1,3 +1,6 @@
 [tools]
 node = "20.20.2"
-python = "3.12.12"
+python = ["3.15.0", "3.12.12"]
+
+[settings]
+python.precompiled_flavor = "install_only_stripped"

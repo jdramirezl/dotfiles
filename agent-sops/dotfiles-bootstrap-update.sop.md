@@ -9,6 +9,7 @@ This SOP guides an agent through auditing, installing, synchronizing, updating, 
 - **repo_path** (required): Absolute path to the checked-out dotfiles repository.
 - **operation** (required): One of `audit`, `install`, `sync`, `update`, `uninstall`, or `deps`.
 - **apply** (optional, default: `false`): Whether approved filesystem or dependency changes may be applied.
+- **dependency_profile** (optional, default: `core`): One of `core`, `desktop`, `hardware`, `all`, or `local` for dependency operations.
 - **backup_dir** (optional): Explicit directory for an additional snapshot before mutation.
 
 **Constraints for parameter acquisition:**
@@ -33,7 +34,8 @@ Run deterministic safety checks and generate the requested operation plan.
 **Constraints:**
 - You MUST run `repo_path/bin/dotfiles check`.
 - For `install` or `sync`, You MUST run `repo_path/bin/dotfiles plan operation`.
-- For `deps`, You MUST run `repo_path/bin/dotfiles deps check`.
+- For `deps`, You MUST run `repo_path/bin/dotfiles deps check --profile dependency_profile`.
+- If `dependency_profile` is `hardware`, You MUST describe the DisplayLink system-extension impact before requesting approval.
 - For `update`, You MUST run `repo_path/bin/dotfiles update` without `--apply`.
 - For `uninstall`, You MUST run `repo_path/bin/dotfiles uninstall` without `--apply`.
 - For `audit`, You MUST run `repo_path/bin/dotfiles status` and `repo_path/bin/dotfiles verify`.
@@ -64,7 +66,7 @@ Run only the repository command corresponding to the approved operation.
 - For `sync`, You MUST run `repo_path/bin/dotfiles sync --apply`.
 - For `update`, You MUST run `repo_path/bin/dotfiles update --apply`.
 - For `uninstall`, You MUST run `repo_path/bin/dotfiles uninstall --apply`.
-- For `deps`, You MUST run `repo_path/bin/dotfiles deps install`.
+- For `deps`, You MUST run `repo_path/bin/dotfiles deps install --profile dependency_profile`; when `dependency_profile` is `hardware`, You MUST also pass `--confirm-hardware` after explicit approval.
 - If `backup_dir` is provided, You MUST run `repo_path/bin/dotfiles backup --output backup_dir` before mutation.
 - You MUST NOT manually copy or remove managed paths because bypassing the manifest defeats transactional safeguards.
 

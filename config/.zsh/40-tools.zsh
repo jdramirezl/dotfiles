@@ -4,6 +4,8 @@ fi
 
 if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
+elif [[ -r "$HOME/.local/share/zinit/plugins/agkozak---zsh-z/zsh-z.plugin.zsh" ]]; then
+  source "$HOME/.local/share/zinit/plugins/agkozak---zsh-z/zsh-z.plugin.zsh"
 fi
 
 [[ -r "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"

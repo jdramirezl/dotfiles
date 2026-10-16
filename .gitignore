@@ -21,5 +21,6 @@ id_ecdsa*
 .backups/
 .state/
 reports/
+Brewfile.local
 config/.config/dotfiles/local.zsh
 config/.zsh/local.zsh
